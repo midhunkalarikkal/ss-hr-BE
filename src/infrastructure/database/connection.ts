@@ -22,26 +22,25 @@ export class DatabaseConnection {
       
       await mongoose.connect(mongoUri);
       
-      console.log('✅ Database connected successfully');
+      console.log('DB Connected');
       
-      // Handle connection events
       mongoose.connection.on('error', (error) => {
-        console.error('❌ Database connection error:', error);
+        console.error('Database connection error:', error);
       });
       
       mongoose.connection.on('disconnected', () => {
-        console.log('⚠️ Database disconnected');
+        console.log('DB disconnected');
       });
       
-      // Graceful shutdown
+      
       process.on('SIGINT', async () => {
         await mongoose.connection.close();
-        console.log('🔒 Database connection closed');
+        console.log('DB Connection closed');
         process.exit(0);
       });
       
     } catch (error) {
-      console.error('❌ Database connection failed:', error);
+      console.error('DB connection failed:', error);
       process.exit(1);
     }
   }
