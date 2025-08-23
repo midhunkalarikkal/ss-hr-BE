@@ -14,7 +14,7 @@ export class DatabaseConnection {
 
   public async connect(): Promise<void> {
     try {
-      const mongoUri = process.env.MONGODB_URI;
+      const mongoUri = process.env["MONGODB_URI"];
 
       if (!mongoUri) {
         throw new Error("MONGODB_URI is not defined in environment variables");

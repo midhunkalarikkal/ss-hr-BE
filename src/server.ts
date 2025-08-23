@@ -4,7 +4,7 @@ import { connectDB, disconnectDB } from "./infrastructure/database/connection";
 
 dotenv.config();
 
-const port = parseInt(process.env.PORT || "5000", 10);
+const port = parseInt(process.env["PORT"] || "5000", 10);
 
 async function startServer() {
   try {
