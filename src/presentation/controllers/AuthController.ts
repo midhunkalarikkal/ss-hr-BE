@@ -22,8 +22,7 @@ export class AuthController {
         password: value.password,
         role: value.role || 'user',
       };
-
-
+      
       const result = await this.authUseCases.register(userData);
 
       res.status(201).json({

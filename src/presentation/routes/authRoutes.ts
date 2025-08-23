@@ -5,15 +5,16 @@ import { MongoUserRepository } from '../../infrastructure/repositories/MongoUser
 
 const router = Router();
 
-
 const userRepository = new MongoUserRepository();
 const authUseCases = new AuthUseCases(userRepository);
 const authController = new AuthController(authUseCases);
 
-
 router.post('/register', authController.register);
+// router.post('/verify-otp', authController.register);
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
-router.get('/verify', authController.verifyToken);
+// router.post('/resendOtp', authController.logout);
+// router.post('/updatePassword', authController.logout);
+router.get('/checkUserStatus', authController.verifyToken);
 
 export default router;

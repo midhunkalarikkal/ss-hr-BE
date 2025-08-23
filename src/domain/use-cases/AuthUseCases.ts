@@ -1,7 +1,7 @@
-import type { User, CreateUserData } from "../entities/User";
-import type { UserRepository } from "../repositories/UserRepository";
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
+import type { User, CreateUserData } from "../entities/User";
+import type { UserRepository } from "../repositories/UserRepository";
 
 export interface LoginCredentials {
   email: string;
@@ -76,7 +76,7 @@ export class AuthUseCases {
   }
 
   private async adminLogin(email: string, password: string): Promise<AuthResult> {
-     console.log('Admin login - email check:', email === this.ADMIN_CREDENTIALS.email);
+    console.log('Admin login - email check:', email === this.ADMIN_CREDENTIALS.email);
     console.log('Admin login - password check:', password === this.ADMIN_CREDENTIALS.password);
     console.log('Expected admin password:', this.ADMIN_CREDENTIALS.password);
     console.log('Provided password:', password);
