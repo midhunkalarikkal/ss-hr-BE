@@ -1,4 +1,4 @@
-import { CommonResponse } from "./common.dts";
+import { ApiResponse, CommonResponse } from "./common.dts";
 import { User } from "../../domain/entities/user";
 
 // Register usecase
@@ -14,4 +14,18 @@ export interface OTPVerificationRequest {
     otp: string;
     verificationToken: string;
     role: string;
+}
+
+// Resend otp
+export interface ResendOtpResponse extends ApiResponse {
+  user: {
+    verificationToken: string, 
+    role: string 
+  }
+}
+
+export interface ResendOtpRequest {
+    role: string;
+    verificationToken?: string;
+    email?: string;
 }

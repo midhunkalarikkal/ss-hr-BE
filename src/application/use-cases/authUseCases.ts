@@ -3,10 +3,9 @@ import type { User } from "../../domain/entities/user";
 import { JWTService } from '../../infrastructure/security/jwt';
 import { OTPService } from '../../infrastructure/service/otpService';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
-import { OTPVerificationRequest, RegisterRequest, RegisterResponse } from '../../infrastructure/dtos/auth.dto';
+import { OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
-
 
 export class RegisterUseCase {
   constructor(
@@ -66,11 +65,45 @@ export class VerifyOTPUseCase {
       
       const isValidOTP = await OTPService.verifyOTP(verificationToken, otp);
       if (!isValidOTP) throw new Error("Invalid or expired OTP.");
-      
+
       return { success: true, message: 'OTP verified successfully.' };
     } catch (error) {
       console.log("VerifyOTPUseCase error : ", error);
       throw new Error("VerifyOTPUseCase error");
     }
+  }
+}
+
+
+export class ResendOtpUseCase {
+
+  constructor(private userRepositoryImpl: UserRepositoryImpl) { }
+
+  async execute(data: ResendOtpRequest): Promise<ResendOtpResponse> {
+    const { role, verificationToken, email } = data;
+    if(!role || (!verificationToken && !email)) throw new Error("Invalid request.");
+
+    let user: User | null = null;
+
+    if (email && role) {
+      if (role === "USER") {
+        user = await this.userRepositoryImpl.findUserByEmail(email);
+      } 
+
+    } else if (verificationToken && role) {
+        user = await this.userRepositoryImpl.verifyUser(verificationToken);
+    } else {
+      throw new Error("Invalid request.");
+    }
+
+    if(!user || !user?.email || !user?.verificationToken) throw new Error("Please register.")
+
+    const otp = await OTPService.setOtp(user?.verificationToken);
+    if (!otp) throw new Error("Unexpected error, please try again.");
+  
+    await OTPService.sendOTP(user?.email, otp);
+
+    return { success: true, message: `OTP sent to email.`, user: {verificationToken: user.verificationToken, role } };
+
   }
 }
