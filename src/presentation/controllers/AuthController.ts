@@ -1,157 +1,139 @@
-import { Request, Response } from 'express';
-import { AuthUseCases } from '../../domain/use-cases/AuthUseCases';
-import { userValidationSchema, loginValidationSchema } from '../../domain/entities/User';
+import { Request, Response} from 'express';
+import { appConfig } from '../../config/env';
+import { HandleError } from '../../infrastructure/error/error';
+import { LoginZodSchema, OTPVerificationZodSchema, RegisterZodSchema, ResendOTPZodSchema } from '../../infrastructure/zod/auth.zod';
+import { CheckUserStatusUseCase, LoginUseCase, RegisterUseCase, ResendOtpUseCase, VerifyOTPUseCase } from '../../application/use-cases/authUseCases';
+import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
+import { Types } from 'mongoose';
+
+const userRepositoryImpl = new UserRepositoryImpl();
+const registerUseCase = new RegisterUseCase(userRepositoryImpl);
+const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
+const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
+const loginUseCase = new LoginUseCase(userRepositoryImpl);
+const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
 
 export class AuthController {
-  constructor(private authUseCases: AuthUseCases) {}
+
+  constructor(
+    private registerUseCase: RegisterUseCase,
+    private verifyOTPUseCase: VerifyOTPUseCase,
+    private resendOtpUseCase: ResendOtpUseCase,
+    private loginUseCase: LoginUseCase,
+    private checkUserStatusUseCase: CheckUserStatusUseCase,
+  ) {
+    this.register = this.register.bind(this);
+    this.verifyOTP = this.verifyOTP.bind(this);
+    this.resendOtp = this.resendOtp.bind(this);
+    this.login = this.login.bind(this);
+    this.checkUserStatus = this.checkUserStatus.bind(this);
+  }
 
   register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { error, value } = userValidationSchema.validate(req.body);
-      if (error) {
-        res.status(400).json({
-          success: false,
-          message: 'Validation error',
-          details: error.details.map(detail => detail.message),
-        });
-        return;
-      }
-      const userData = {
-        fullName: value.fullName,  
-        email: value.email,
-        password: value.password,
-        role: value.role || 'user',
+      const validateData = RegisterZodSchema.parse(req.body);
+      const result = await this.registerUseCase.execute(validateData);
+       res.cookie("token", result.user.token, {
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: 'none',
+        secure: appConfig.nodeEnv !== 'development'
+      });
+
+      const { token: token, ...authUserWithoutToken } = result.user;
+      const resultWithoutToken = {
+        ...result,
+        user: authUserWithoutToken,
+    };
+    res.status(200).json(resultWithoutToken);
+    } catch (error) {
+      console.log("error : ",error);
+      HandleError.handle(error, res);
+    };
+
+  }
+
+   async verifyOTP(req: Request, res: Response) {
+    try {
+      const validateData = OTPVerificationZodSchema.parse(req.body);
+      const { otp, verificationToken, role } = validateData;
+      if (!otp || !verificationToken || !role) throw new Error("Invalid request.");
+      const result = await this.verifyOTPUseCase.execute({otp, verificationToken, role});
+      res.status(200).json(result);
+    } catch (error) {
+      HandleError.handle(error, res);
+    }
+  }
+
+   async resendOtp(req: Request, res: Response) {
+    try {
+      const validateData = ResendOTPZodSchema.parse(req.body);
+      const { role, verificationToken, email } = validateData;
+      if (!role || (!verificationToken && !email)) throw new Error("Invalid request.");
+      const result = await this.resendOtpUseCase.execute({role, verificationToken, email});
+      res.status(200).json(result);
+    } catch (error) {
+      HandleError.handle(error, res);
+    }
+  }
+
+  async login(req: Request, res: Response) {
+    try {
+      const validateData = LoginZodSchema.parse(req.body);
+      const { email, password, role } = validateData;
+      if (!email || !password || !role) throw new Error("Invalid request.");
+      const { success, message, user } = await this.loginUseCase.execute({email, password, role});
+      res.cookie("token", user.token, {
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: 'none',
+        secure: appConfig.nodeEnv !== 'development'
+      });
+      const { token: token, ...authUserWithoutToken } = user;
+      const resultWithoutToken = {
+        success, message,
+        user: authUserWithoutToken,
       };
-
-
-      const result = await this.authUseCases.register(userData);
-
-      res.status(201).json({
-        success: true,
-        message: 'User registered successfully',
-        data: {
-          user: result.user,
-          token: result.token,
-        },
-      });
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      
-      if (error.message === 'User already exists with this email') {
-        res.status(409).json({
-          success: false,
-          message: error.message,
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-        error: process.env['NODE_ENV'] === 'development' ? error.message : undefined,
-      });
+      res.status(200).json(resultWithoutToken);
+    } catch (error) {
+      console.log("error : ",error);
+      HandleError.handle(error, res);
     }
-  };
+  }
 
-  login = async (req: Request, res: Response): Promise<void> => {
+  async logout(req: Request, res: Response) {
     try {
-      const { error, value } = loginValidationSchema.validate(req.body);
-      if (error) {
-        res.status(400).json({
-          success: false,
-          message: 'Validation error',
-          details: error.details.map(detail => detail.message),
-        });
-        return;
-      }
-
-      const result = await this.authUseCases.login({
-        email: value.email,
-        password: value.password,
-      });
-
-      res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        data: {
-          user: result.user,
-          token: result.token,
-        },
-      });
-    } catch (error: any) {
-      console.error('Login error:', error);
-      
-      if (error.message === 'Invalid email or password' || 
-          error.message === 'Account is deactivated. Please contact support.') {
-        res.status(401).json({
-          success: false,
-          message: error.message,
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-        error: process.env['NODE_ENV'] === 'development' ? error.message : undefined,
-      });
+      res.clearCookie("token");
+      res.status(200).json({ success: true, message: "Logged out successfully." });
+    } catch (error) {
+      HandleError.handle(error, res);
     }
-  };
+  }
 
-  logout = async (_req: Request, res: Response): Promise<void> => {
+  // async updatePassword(req: Request, res: Response) {
+  //   try {
+  //     const validateData = UpdatePasswordZodSchema.parse(req.body);
+  //     const { role, verificationToken, password } = validateData;
+  //     if (!role || !verificationToken || !password) throw new Error("Invalid request.");
+  //     const result = await this.updatePasswordUseCase.execute({role, verificationToken, password});
+  //     res.status(200).json(result);
+  //   } catch (error) {
+  //     HandleError.handle(error, res);
+  //   }
+  // }
+
+  async checkUserStatus(req: Request, res: Response) {
     try {
-      res.status(200).json({
-        success: true,
-        message: 'Logout successful',
-      });
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-        error: process.env['NODE_ENV'] === 'development' ? error.message : undefined,
-      });
+      const user = req.user;
+      if(!user) throw new Error("")
+      const result = await this.checkUserStatusUseCase.execute({id: new Types.ObjectId(user.userOrProviderId), role: user.role});
+      res.status(result.status).json(result);
+    } catch (error) {
+      HandleError.handle(error, res);
     }
-  };
+  }
 
-  verifyToken = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({
-          success: false,
-          message: 'No token provided',
-        });
-        return;
-      }
-
-      const token = authHeader.substring(7); 
-      const user = await this.authUseCases.verifyToken(token);
-
-      res.status(200).json({
-        success: true,
-        message: 'Token is valid',
-        data: {
-          user,
-        },
-      });
-    } catch (error: any) {
-      console.error('Token verification error:', error);
-      
-      if (error.message === 'Invalid or expired token' || 
-          error.message === 'Account is deactivated') {
-        res.status(401).json({
-          success: false,
-          message: error.message,
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-        error: process.env['NODE_ENV'] === 'development' ? error.message : undefined,
-      });
-    }
-  };
 }
+
+const authController = new AuthController(registerUseCase, verifyOTPUseCase, resendOtpUseCase, loginUseCase, checkUserStatusUseCase);
+export { authController };

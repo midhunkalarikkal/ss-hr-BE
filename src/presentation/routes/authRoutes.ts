@@ -1,19 +1,15 @@
 import { Router } from 'express';
-import { AuthController } from '../controllers/AuthController';
-import { AuthUseCases } from '../../domain/use-cases/AuthUseCases';
-import { MongoUserRepository } from '../../infrastructure/repositories/MongoUserRepository';
+import { authController } from '../controllers/authController';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
-
-const userRepository = new MongoUserRepository();
-const authUseCases = new AuthUseCases(userRepository);
-const authController = new AuthController(authUseCases);
-
-
 router.post('/register', authController.register);
+router.post('/verify-otp', authController.verifyOTP);
+router.post('/resendOtp', authController.resendOtp);
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
-router.get('/verify', authController.verifyToken);
+// router.post('/updatePassword', authController.logout);
+router.get('/checkUserStatus',authMiddleware, authController.checkUserStatus);
 
 export default router;
