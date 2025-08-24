@@ -41,6 +41,10 @@ const UserSchema = new Schema<IUser>({
     maxlength: [100, "Password must be at most 100 characters"],
     match: [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,100}$/, "Invalid password"]
   },
+  role: {
+    type: String,
+    required: [true, "role is required"],
+  },
   isBlocked: {
     type: Boolean,
     default: false
