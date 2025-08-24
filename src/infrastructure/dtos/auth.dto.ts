@@ -8,3 +8,10 @@ export interface RegisterResponse extends CommonResponse {
     token: string;
   }
 }
+
+// Verify Otp
+export interface OTPVerificationRequest {
+    otp: string;
+    verificationToken: string;
+    role: string;
+}
