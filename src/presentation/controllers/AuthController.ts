@@ -1,14 +1,15 @@
 import { Request, Response} from 'express';
 import { appConfig } from '../../config/env';
 import { HandleError } from '../../infrastructure/error/error';
-import { OTPVerificationZodSchema, RegisterZodSchema, ResendOTPZodSchema } from '../../infrastructure/zod/auth.zod';
-import { RegisterUseCase, ResendOtpUseCase, VerifyOTPUseCase } from '../../application/use-cases/authUseCases';
+import { LoginZodSchema, OTPVerificationZodSchema, RegisterZodSchema, ResendOTPZodSchema } from '../../infrastructure/zod/auth.zod';
+import { LoginUseCase, RegisterUseCase, ResendOtpUseCase, VerifyOTPUseCase } from '../../application/use-cases/authUseCases';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const registerUseCase = new RegisterUseCase(userRepositoryImpl);
 const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
+const loginUseCase = new LoginUseCase(userRepositoryImpl);
 
 export class AuthController {
 
@@ -16,10 +17,12 @@ export class AuthController {
     private registerUseCase: RegisterUseCase,
     private verifyOTPUseCase: VerifyOTPUseCase,
     private resendOtpUseCase: ResendOtpUseCase,
+    private loginUseCase: LoginUseCase,
   ) {
     this.register = this.register.bind(this);
     this.verifyOTP = this.verifyOTP.bind(this);
     this.resendOtp = this.resendOtp.bind(this);
+    this.login = this.login.bind(this);
   }
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -70,28 +73,29 @@ export class AuthController {
     }
   }
 
-  // async login(req: Request, res: Response) {
-  //   try {
-  //     const validateData = LoginZodSchema.parse(req.body);
-  //     const { email, password, role } = validateData;
-  //     if (!email || !password || !role) throw new Error("Invalid request.");
-  //     const { success, message, authUser } = await this.loginUseCase.execute({email, password, role});
-  //     res.cookie("token", authUser.token, {
-  //       maxAge: 2 * 24 * 60 * 60 * 1000,
-  //       httpOnly: true,
-  //       sameSite: appConfig.nodeEnv === 'development' ? 'lax' : 'none',
-  //       secure: appConfig.nodeEnv !== 'development'
-  //     });
-  //     const { token: token, ...authUserWithoutToken } = authUser;
-  //     const resultWithoutToken = {
-  //       success, message,
-  //       authUser: authUserWithoutToken,
-  //     };
-  //     res.status(200).json(resultWithoutToken);
-  //   } catch (error) {
-  //     HandleError.handle(error, res);
-  //   }
-  // }
+  async login(req: Request, res: Response) {
+    try {
+      const validateData = LoginZodSchema.parse(req.body);
+      const { email, password, role } = validateData;
+      if (!email || !password || !role) throw new Error("Invalid request.");
+      const { success, message, user } = await this.loginUseCase.execute({email, password, role});
+      res.cookie("token", user.token, {
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: 'none',
+        secure: appConfig.nodeEnv !== 'development'
+      });
+      const { token: token, ...authUserWithoutToken } = user;
+      const resultWithoutToken = {
+        success, message,
+        user: authUserWithoutToken,
+      };
+      res.status(200).json(resultWithoutToken);
+    } catch (error) {
+      console.log("error : ",error);
+      HandleError.handle(error, res);
+    }
+  }
 
   async logout(req: Request, res: Response) {
     try {
@@ -127,5 +131,5 @@ export class AuthController {
 
 }
 
-const authController = new AuthController(registerUseCase, verifyOTPUseCase, resendOtpUseCase);
+const authController = new AuthController(registerUseCase, verifyOTPUseCase, resendOtpUseCase, loginUseCase);
 export { authController };

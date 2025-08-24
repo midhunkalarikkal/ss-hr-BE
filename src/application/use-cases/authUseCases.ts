@@ -3,9 +3,11 @@ import type { User } from "../../domain/entities/user";
 import { JWTService } from '../../infrastructure/security/jwt';
 import { OTPService } from '../../infrastructure/service/otpService';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
-import { OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
+import { LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
+import { adminConfig } from '../../config/env';
+import { generateSignedUrl } from '../../config/aws_s3';
 
 export class RegisterUseCase {
   constructor(
@@ -106,4 +108,65 @@ export class ResendOtpUseCase {
     return { success: true, message: `OTP sent to email.`, user: {verificationToken: user.verificationToken, role } };
 
   }
+}
+
+
+export class LoginUseCase {
+    constructor(private userRepositoryImpl: UserRepositoryImpl) { }
+
+    async execute(data: LoginRequest): Promise<LoginResponse> {
+        const { email, password, role } = data;
+        if (!email || !password || !role) throw new Error("Invalid request.");
+
+        // validateOrThrow("email", email);
+        // validateOrThrow("password", password);
+        // validateOrThrow("role", role);
+
+        let user: User | null = null;
+
+        if (role === "user" || "admin") {
+            user = await this.userRepositoryImpl.findUserByEmail(email);
+        } else if (role === "superAdmin") {
+            if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
+                throw new Error("Invalid credentials.");
+            }
+            const token = JWTService.generateToken({ email: email, role: role });
+            return { success: true, message: "Logged In Successfully.", user: { fullName: "Super Admin", profileImage: "", role: role, token } };
+        } else {
+            throw new Error("Invalid request.");
+        }
+
+        if (!user) throw new Error("Invalid credentials")
+
+        if (user.isBlocked) throw new Error("Your account is blocked, please contact us.");
+        if (user.isVerified) throw new Error("Your registration was incomplete, please register again.");
+
+        const valid = await PasswordHasher.comparePassword(password, user.password);
+
+        if (!valid) throw new Error("Invalid credentials.");
+
+        const token = JWTService.generateToken({ id: user._id, role: role });
+
+        let updateProfileImage;
+
+        if (user.profileImage) {
+            const userOrProviderProfileUrl = user.profileImage;
+            if (!userOrProviderProfileUrl) throw new Error("Profile image fetching error.");
+            const urlParts = userOrProviderProfileUrl?.split('/');
+            if (!urlParts) throw new Error("UrlParts error.");
+            const s3Key = urlParts.slice(3).join('/');
+            if (!s3Key) throw new Error("Image retrieving.");
+            const signedUrl = await generateSignedUrl(s3Key);
+            if (!signedUrl) throw new Error("Image fetching error.");
+            updateProfileImage = signedUrl
+        }
+
+        return { success: true, message: 'Logged In Successfully.', user: { 
+          _id: user._id, 
+          fullName: user.fullName, 
+          profileImage: updateProfileImage ? updateProfileImage : user.profileImage, 
+          role: role, 
+          token, 
+         } };
+    }
 }

@@ -11,7 +11,7 @@ export class User {
     public role: Role,
     public phone: string,
     public profileImage: string,
-    public isActive: boolean,
+    public isBlocked: boolean,
     public isVerified: boolean,
     public verificationToken: string,
     public googleId: string,

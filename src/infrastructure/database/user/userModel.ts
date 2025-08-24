@@ -10,7 +10,7 @@ export interface IUser extends Document {
   phone: string;
   profileImage: string;
   isVerified: boolean;
-  isActive: boolean;
+  isBlocked: boolean;
   verificationToken: string;
   googleId: string;
   createdAt: Date;
@@ -41,7 +41,7 @@ const UserSchema = new Schema<IUser>({
     maxlength: [100, "Password must be at most 100 characters"],
     match: [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,100}$/, "Invalid password"]
   },
-  isActive: {
+  isBlocked: {
     type: Boolean,
     default: false
   },

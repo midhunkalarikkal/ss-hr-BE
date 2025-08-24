@@ -1,5 +1,6 @@
 import { ApiResponse, CommonResponse } from "./common.dts";
 import { User } from "../../domain/entities/user";
+import { Types } from "mongoose";
 
 // Register usecase
 export type RegisterRequest = Pick<User, "fullName" | "email" | "password" | "role">
@@ -23,9 +24,26 @@ export interface ResendOtpResponse extends ApiResponse {
     role: string 
   }
 }
-
 export interface ResendOtpRequest {
     role: string;
     verificationToken?: string;
     email?: string;
+}
+
+// Login
+// **** Login use case **** \\
+// user or provider login use case request payload interface
+export interface LoginRequest {
+    email: string;
+    password: string;
+    role: string;
+}
+export interface LoginResponse extends CommonResponse {
+    user: { 
+        _id?: Types.ObjectId;
+        fullName: string, 
+        profileImage: string | null, 
+        role: string, 
+        token: string, 
+    }
 }

@@ -16,7 +16,7 @@ export class UserRepositoryImpl implements IUserRepository {
             user.role,
             user.phone,
             user.profileImage,
-            user.isActive,
+            user.isBlocked,
             user.isVerified,
             user.verificationToken,
             user.googleId,

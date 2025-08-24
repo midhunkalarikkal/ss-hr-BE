@@ -11,7 +11,7 @@ export type CreateGoogleUser = {
 export type CreateUserProps = CreateLocalUser | CreateGoogleUser;
 
 
-export type AdminFetchAllUsers = Array<Pick<User, "_id" | "fullName" | "email" | "isActive" | "isVerified">>;
+export type AdminFetchAllUsers = Array<Pick<User, "_id" | "fullName" | "email" | "isBlocked" | "isVerified">>;
 
 
 export interface IUserRepository {
