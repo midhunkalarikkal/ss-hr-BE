@@ -18,8 +18,19 @@ if (appConfig.nodeEnv === 'development') {
   app.use(morgan('dev'));
 }
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://ss-hr-c-fe-fucg.vercel.app"
+];
+
 app.use(cors({
-  origin: appConfig.frontendUrl,
+  origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
   methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
