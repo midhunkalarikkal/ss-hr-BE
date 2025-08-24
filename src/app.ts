@@ -19,7 +19,7 @@ if (appConfig.nodeEnv === 'development') {
 }
 
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: appConfig.frontendUrl,
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
   methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
