@@ -1,10 +1,11 @@
 import app from "./app";
 import dotenv from "dotenv";
-import { connectDB, disconnectDB } from "./infrastructure/database/connection";
+import { connectDB, disconnectDB } from "./config/database/connection";
+import { appConfig } from "./config/env";
 
 dotenv.config();
 
-const port = parseInt(process.env["PORT"] || "5000", 10);
+const port = parseInt(appConfig.port || "5000", 10);
 
 async function startServer() {
   try {

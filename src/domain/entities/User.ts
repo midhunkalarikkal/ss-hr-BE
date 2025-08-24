@@ -1,46 +1,27 @@
-import Joi from 'joi';
+import { Types } from "mongoose";
 
-export interface User {
-  _id?: string;
-  fullName: string;
-  email: string;
-  password: string;
-  role: 'user' | 'admin' | 'hr'
-  isVerified: boolean;
-  isActive?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+export type Role = 'user' | 'admin' | 'superAdmin'
+
+export class User {
+  constructor(
+    public _id: Types.ObjectId,
+    public fullName: string,
+    public email: string,
+    public password: string,
+    public role: Role,
+    public phone: string,
+    public profileImage: string,
+    public isActive: boolean,
+    public isVerified: boolean,
+    public verificationToken: string,
+    public googleId: string,
+    public createdAt: Date,
+    public updatedAt: Date,
+  ) {
+
+  }
 }
 
 
-export interface CreateUserData {
-  fullName: string;
-  email: string;
-  password: string;
-  role?: 'user' | 'admin' | 'hr';
-}
-
-export interface UpdateUserData {
-  fullName?: string;
-  email?: string;
-  password?: string;
-  role?: 'user' | 'admin' | 'hr';
-  isVerified?: boolean;
-  isActive?: boolean;
-}
-
-export const userValidationSchema = Joi.object({
-  fullName: Joi.string().min(2).max(100).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(8).required(),
-  role: Joi.string().valid('user', 'admin', 'hr').default('user'),
-  isVerified: Joi.boolean().default(false),
-  isActive: Joi.boolean().default(true),
-});
-
-export const loginValidationSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
-});
 
 

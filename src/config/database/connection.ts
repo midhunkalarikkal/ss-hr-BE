@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { mongoConfig } from "../env";
 
 export class DatabaseConnection {
   private static instance: DatabaseConnection;
@@ -14,7 +15,7 @@ export class DatabaseConnection {
 
   public async connect(): Promise<void> {
     try {
-      const mongoUri = process.env["MONGODB_URI"];
+      const mongoUri = mongoConfig.mongoURL;
 
       if (!mongoUri) {
         throw new Error("MONGODB_URI is not defined in environment variables");
