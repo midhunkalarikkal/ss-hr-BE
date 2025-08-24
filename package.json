@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
@@ -18,11 +18,16 @@
   "author": "Full Stack Solutions",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.873.0",
+    "@aws-sdk/lib-storage": "^3.873.0",
+    "@aws-sdk/s3-request-presigner": "^3.873.0",
+    "@upstash/redis": "^1.35.3",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "express": "^4.18.2",
+    "express": "^5.1.0",
     "helmet": "^8.1.0",
     "joi": "^18.0.0",
     "jsonwebtoken": "^9.0.2",
@@ -30,12 +35,16 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
+    "otp-generator-module": "^1.0.2",
     "rate-limiter-flexible": "^7.2.0",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "uuid": "^11.1.0",
+    "zod": "^4.1.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/compression": "^1.8.1",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
@@ -53,6 +62,8 @@
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
   }
 }
