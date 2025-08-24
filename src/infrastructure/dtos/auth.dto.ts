@@ -1,6 +1,6 @@
-import { ApiResponse, CommonResponse } from "./common.dts";
-import { User } from "../../domain/entities/user";
 import { Types } from "mongoose";
+import { User } from "../../domain/entities/user";
+import { ApiResponse, CommonResponse } from "./common.dts";
 
 // Register usecase
 export type RegisterRequest = Pick<User, "fullName" | "email" | "password" | "role">
