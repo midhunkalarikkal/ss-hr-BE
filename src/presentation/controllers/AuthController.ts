@@ -2,14 +2,16 @@ import { Request, Response} from 'express';
 import { appConfig } from '../../config/env';
 import { HandleError } from '../../infrastructure/error/error';
 import { LoginZodSchema, OTPVerificationZodSchema, RegisterZodSchema, ResendOTPZodSchema } from '../../infrastructure/zod/auth.zod';
-import { LoginUseCase, RegisterUseCase, ResendOtpUseCase, VerifyOTPUseCase } from '../../application/use-cases/authUseCases';
+import { CheckUserStatusUseCase, LoginUseCase, RegisterUseCase, ResendOtpUseCase, VerifyOTPUseCase } from '../../application/use-cases/authUseCases';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
+import { Types } from 'mongoose';
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const registerUseCase = new RegisterUseCase(userRepositoryImpl);
 const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
 const loginUseCase = new LoginUseCase(userRepositoryImpl);
+const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
 
 export class AuthController {
 
@@ -18,11 +20,13 @@ export class AuthController {
     private verifyOTPUseCase: VerifyOTPUseCase,
     private resendOtpUseCase: ResendOtpUseCase,
     private loginUseCase: LoginUseCase,
+    private checkUserStatusUseCase: CheckUserStatusUseCase,
   ) {
     this.register = this.register.bind(this);
     this.verifyOTP = this.verifyOTP.bind(this);
     this.resendOtp = this.resendOtp.bind(this);
     this.login = this.login.bind(this);
+    this.checkUserStatus = this.checkUserStatus.bind(this);
   }
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -118,18 +122,18 @@ export class AuthController {
   //   }
   // }
 
-  // async checkUserStatus(req: Request, res: Response) {
-  //   try {
-  //     const user = req.user;
-  //     if(!user) throw new Error("")
-  //     const result = await this.checkUserStatusUseCase.execute({id: new Types.ObjectId(user.userOrProviderId), role: user.role});
-  //     res.status(result.status).json(result);
-  //   } catch (error) {
-  //     HandleError.handle(error, res);
-  //   }
-  // }
+  async checkUserStatus(req: Request, res: Response) {
+    try {
+      const user = req.user;
+      if(!user) throw new Error("")
+      const result = await this.checkUserStatusUseCase.execute({id: new Types.ObjectId(user.userOrProviderId), role: user.role});
+      res.status(result.status).json(result);
+    } catch (error) {
+      HandleError.handle(error, res);
+    }
+  }
 
 }
 
-const authController = new AuthController(registerUseCase, verifyOTPUseCase, resendOtpUseCase, loginUseCase);
+const authController = new AuthController(registerUseCase, verifyOTPUseCase, resendOtpUseCase, loginUseCase, checkUserStatusUseCase);
 export { authController };

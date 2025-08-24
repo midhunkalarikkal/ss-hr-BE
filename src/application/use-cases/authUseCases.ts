@@ -3,11 +3,12 @@ import type { User } from "../../domain/entities/user";
 import { JWTService } from '../../infrastructure/security/jwt';
 import { OTPService } from '../../infrastructure/service/otpService';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
-import { LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
+import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
 import { adminConfig } from '../../config/env';
 import { generateSignedUrl } from '../../config/aws_s3';
+import { Types } from 'mongoose';
 
 export class RegisterUseCase {
   constructor(
@@ -168,5 +169,25 @@ export class LoginUseCase {
           role: role, 
           token, 
          } };
+    }
+}
+
+
+export class CheckUserStatusUseCase {
+    constructor(private userRepository: UserRepositoryImpl){}
+
+    async execute(data: CheckUserStatusRequest) : Promise<CheckUserStatusResponse> {
+        const { id } = data;
+
+        // Validator.validateObjectId(id);
+        // Validator.validateRole(role);
+
+            const user = await this.userRepository.findUserById(new Types.ObjectId(id));
+            if (user?.isBlocked) {
+                return { status: 403, success: false, message: "Your account has been blocked." };
+            } else {
+                return { status: 200, success: true, message: "Your account is active." };
+            }
+       
     }
 }

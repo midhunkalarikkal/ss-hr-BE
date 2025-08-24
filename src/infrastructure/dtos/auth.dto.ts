@@ -31,8 +31,6 @@ export interface ResendOtpRequest {
 }
 
 // Login
-// **** Login use case **** \\
-// user or provider login use case request payload interface
 export interface LoginRequest {
     email: string;
     password: string;
@@ -46,4 +44,14 @@ export interface LoginResponse extends CommonResponse {
         role: string, 
         token: string, 
     }
+}
+
+
+// Check Auth
+export interface CheckUserStatusRequest {
+    id: Types.ObjectId;
+    role: string;
+}
+export interface CheckUserStatusResponse extends CommonResponse {
+    status: number;
 }

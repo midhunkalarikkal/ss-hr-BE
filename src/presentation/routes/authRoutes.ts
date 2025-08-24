@@ -10,6 +10,6 @@ router.post('/resendOtp', authController.resendOtp);
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
 // router.post('/updatePassword', authController.logout);
-// router.get('/checkUserStatus', authController.verifyToken);
+router.get('/checkUserStatus',authMiddleware, authController.checkUserStatus);
 
 export default router;
