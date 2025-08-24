@@ -124,7 +124,7 @@ export class LoginUseCase {
 
         let user: User | null = null;
 
-        if (role === "user" || "admin") {
+        if (role === "user") { // TODO need to ahandle admin
             user = await this.userRepositoryImpl.findUserByEmail(email);
         } else if (role === "superAdmin") {
             if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
