@@ -1,14 +1,14 @@
+import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import type { User } from "../../domain/entities/user";
+import { adminConfig } from '../../config/env';
+import { User } from '../../domain/entities/user';
+import { generateSignedUrl } from '../../config/aws_s3';
 import { JWTService } from '../../infrastructure/security/jwt';
+import { ApiResponse } from '../../infrastructure/dtos/common.dts';
 import { OTPService } from '../../infrastructure/service/otpService';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
-import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
-import { ApiResponse } from '../../infrastructure/dtos/common.dts';
-import { adminConfig } from '../../config/env';
-import { generateSignedUrl } from '../../config/aws_s3';
-import { Types } from 'mongoose';
+import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
 
 export class RegisterUseCase {
   constructor(
