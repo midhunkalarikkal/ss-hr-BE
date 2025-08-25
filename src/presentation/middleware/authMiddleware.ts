@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { JWTService } from "../../infrastructure/security/jwt";
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+
   const token = req.cookies["token"];
   const currentTime = Date.now();
 

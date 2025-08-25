@@ -36,7 +36,7 @@ export class AuthController {
        res.cookie("token", result.user.token, {
         maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'strict',
         secure: appConfig.nodeEnv !== 'development'
       });
 
@@ -86,7 +86,7 @@ export class AuthController {
       res.cookie("token", user.token, {
         maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'strict',
         secure: appConfig.nodeEnv !== 'development'
       });
       const { token: token, ...authUserWithoutToken } = user;
@@ -94,6 +94,7 @@ export class AuthController {
         success, message,
         user: authUserWithoutToken,
       };
+      console.log("resultWithoutToken : ",resultWithoutToken);
       res.status(200).json(resultWithoutToken);
     } catch (error) {
       console.log("error : ",error);
@@ -125,8 +126,9 @@ export class AuthController {
   async checkUserStatus(req: Request, res: Response) {
     try {
       const user = req.user;
-      if(!user) throw new Error("")
-      const result = await this.checkUserStatusUseCase.execute({id: new Types.ObjectId(user.userOrProviderId), role: user.role});
+      console.log("user : ",user);
+      if(!user) throw new Error("User not found")
+      const result = await this.checkUserStatusUseCase.execute({id: new Types.ObjectId(user.user), role: user.role});
       res.status(result.status).json(result);
     } catch (error) {
       HandleError.handle(error, res);

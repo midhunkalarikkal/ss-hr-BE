@@ -1,7 +1,7 @@
 import app from "./app";
 import dotenv from "dotenv";
-import { connectDB, disconnectDB } from "./config/database/connection";
 import { appConfig } from "./config/env";
+import { connectDB, disconnectDB } from "./config/database/connection";
 
 dotenv.config();
 
