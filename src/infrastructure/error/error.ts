@@ -3,23 +3,29 @@ import { Response } from 'express';
 
 export class HandleError {
   static handle(error: any, res: Response): void {
+    console.log("Handle Error");
     if (error instanceof ZodError) {
+      console.log("zod error");
       const messageString = error.issues.map(issue => issue.message).join(", ");
       res.status(400).json({ success: false, message: messageString });
       return;
     }
 
     if (error instanceof Error) {
+      console.log("instance of error");
+      console.log("message : ",error.message);
       res.status(400).json({ success: false, message: error.message });
       return;
     }
 
     if (error.name === "UnauthorizedError") {
+      console.log("UnauthorizedError")
       res.status(401).json({ success: false, message: "Unauthorized access." });
       return;
     }
 
     if (error.name === "ForbiddenError") {
+      console.log("ForbiddenError")
       res.status(403).json({ success: false, message: "Forbidden action." });
       return;
     }

@@ -7,7 +7,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: Role;
-  phone: string;
+  phoneOne: string;
+  phoneTwo: string;
   profileImage: string;
   isVerified: boolean;
   isBlocked: boolean;
@@ -53,7 +54,14 @@ const UserSchema = new Schema<IUser>({
     type: Boolean,
     default: false
   },
-  phone: {
+  phoneOne: {
+    type: String,
+    default: null,
+    minlength: [7, "Phone number must be at least 7 characters"],
+    maxlength: [20, "Phone number must be at most 20 characters"],
+    match: [/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."],
+  },
+  phoneTwo: {
     type: String,
     default: null,
     minlength: [7, "Phone number must be at least 7 characters"],
