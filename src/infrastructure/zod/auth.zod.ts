@@ -19,7 +19,7 @@ export const roleField = z.enum(["user", "admin", "superAdmin"] as const);
 
 export const limitedRoleField = z.enum(["user", "admin", "superAdmin"]);
 
-export const otpField = z.string().length(6, "OTP must be exactly 6 characters");
+export const otpField = z.string().length(6, "OTP must be exactly 6 digits");
 
 export const verificationTokenField = z.string();
 
