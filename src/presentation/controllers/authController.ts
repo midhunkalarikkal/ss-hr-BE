@@ -5,6 +5,7 @@ import { LoginZodSchema, OTPVerificationZodSchema, RegisterZodSchema, ResendOTPZ
 import { CheckUserStatusUseCase, LoginUseCase, RegisterUseCase, ResendOtpUseCase, VerifyOTPUseCase } from '../../application/use-cases/authUseCases';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { Types } from 'mongoose';
+import { GoogleAuthUseCase } from '../../application/use-cases/googleAuthUseCase';
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const registerUseCase = new RegisterUseCase(userRepositoryImpl);
@@ -12,6 +13,7 @@ const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
 const loginUseCase = new LoginUseCase(userRepositoryImpl);
 const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
+const googleAuthUseCase = new GoogleAuthUseCase(userRepositoryImpl);
 
 export class AuthController {
 
@@ -21,12 +23,14 @@ export class AuthController {
     private resendOtpUseCase: ResendOtpUseCase,
     private loginUseCase: LoginUseCase,
     private checkUserStatusUseCase: CheckUserStatusUseCase,
+    private googleAuthUseCase: GoogleAuthUseCase,
   ) {
     this.register = this.register.bind(this);
     this.verifyOTP = this.verifyOTP.bind(this);
     this.resendOtp = this.resendOtp.bind(this);
     this.login = this.login.bind(this);
     this.checkUserStatus = this.checkUserStatus.bind(this);
+    this.googleCallback = this.googleCallback.bind(this);
   }
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -111,18 +115,6 @@ export class AuthController {
     }
   }
 
-  // async updatePassword(req: Request, res: Response) {
-  //   try {
-  //     const validateData = UpdatePasswordZodSchema.parse(req.body);
-  //     const { role, verificationToken, password } = validateData;
-  //     if (!role || !verificationToken || !password) throw new Error("Invalid request.");
-  //     const result = await this.updatePasswordUseCase.execute({role, verificationToken, password});
-  //     res.status(200).json(result);
-  //   } catch (error) {
-  //     HandleError.handle(error, res);
-  //   }
-  // }
-
   async checkUserStatus(req: Request, res: Response) {
     try {
       const user = req.user;
@@ -135,7 +127,36 @@ export class AuthController {
     }
   }
 
+  async googleCallback(req: Request, res: Response) {
+  try {
+    if (!req.user) {
+      return res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
+    }
+
+    const result = await this.googleAuthUseCase.execute(req.user as any);
+    
+    res.cookie("token", result.user.token, {
+      maxAge: 2 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: appConfig.nodeEnv !== 'development'
+    });
+
+    res.redirect(`${appConfig.frontendUrl}/`);
+  } catch (error) {
+    console.log("Google auth error:", error);
+    res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
+  }
+}
 }
 
-const authController = new AuthController(registerUseCase, verifyOTPUseCase, resendOtpUseCase, loginUseCase, checkUserStatusUseCase);
+const authController = new AuthController(
+  registerUseCase, 
+  verifyOTPUseCase, 
+  resendOtpUseCase, 
+  loginUseCase, 
+  checkUserStatusUseCase, 
+  googleAuthUseCase
+);
+
 export { authController };

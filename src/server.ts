@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { appConfig } from "./config/env";
 import { connectDB, disconnectDB } from "./config/database/connection";
 
+
 dotenv.config();
 
 const port = parseInt(appConfig.port || "5000", 10);
