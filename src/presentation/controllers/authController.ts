@@ -127,10 +127,35 @@ export class AuthController {
     }
   }
 
-  async googleCallback(req: Request, res: Response) {
+//   async googleCallback(req: Request, res: Response) {
+//   try {
+//     if (!req.user) {
+//       return res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
+//     }
+
+//     const result = await this.googleAuthUseCase.execute(req.user as any);
+    
+//     res.cookie("token", result.user.token, {
+//       maxAge: 2 * 24 * 60 * 60 * 1000,
+//       httpOnly: true,
+//       sameSite: 'strict',
+//       secure: appConfig.nodeEnv !== 'development'
+//     });
+
+//     res.redirect(`${appConfig.frontendUrl}/`);
+//   } catch (error) {
+//     console.log("Google auth error:", error);
+//     res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
+//   }
+// }
+
+async googleCallback(req: Request, res: Response) {
   try {
     if (!req.user) {
-      return res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
+      const frontendUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : 'https://ss-hr-fe.vercel.app';
+      return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
 
     const result = await this.googleAuthUseCase.execute(req.user as any);
@@ -142,12 +167,21 @@ export class AuthController {
       secure: appConfig.nodeEnv !== 'development'
     });
 
-    res.redirect(`${appConfig.frontendUrl}/`);
+    const frontendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000' 
+      : 'https://ss-hr-fe.vercel.app';
+    res.redirect(`${frontendUrl}/`);
   } catch (error) {
     console.log("Google auth error:", error);
-    res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
+    const frontendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000' 
+      : 'https://ss-hr-fe.vercel.app';
+    res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
   }
 }
+
+
+
 }
 
 const authController = new AuthController(
