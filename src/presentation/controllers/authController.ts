@@ -1,11 +1,22 @@
-import { Request, Response} from 'express';
-import { appConfig } from '../../config/env';
-import { HandleError } from '../../infrastructure/error/error';
-import { LoginZodSchema, OTPVerificationZodSchema, RegisterZodSchema, ResendOTPZodSchema } from '../../infrastructure/zod/auth.zod';
-import { CheckUserStatusUseCase, LoginUseCase, RegisterUseCase, ResendOtpUseCase, VerifyOTPUseCase } from '../../application/use-cases/authUseCases';
-import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
-import { Types } from 'mongoose';
-import { GoogleAuthUseCase } from '../../application/use-cases/googleAuthUseCase';
+import { Request, Response } from "express";
+import { appConfig } from "../../config/env";
+import { HandleError } from "../../infrastructure/error/error";
+import {
+  LoginZodSchema,
+  OTPVerificationZodSchema,
+  RegisterZodSchema,
+  ResendOTPZodSchema,
+} from "../../infrastructure/zod/auth.zod";
+import {
+  CheckUserStatusUseCase,
+  LoginUseCase,
+  RegisterUseCase,
+  ResendOtpUseCase,
+  VerifyOTPUseCase,
+} from "../../application/use-cases/authUseCases";
+import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
+import { Types } from "mongoose";
+import { GoogleAuthUseCase } from "../../application/use-cases/googleAuthUseCase";
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const registerUseCase = new RegisterUseCase(userRepositoryImpl);
@@ -16,14 +27,13 @@ const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
 const googleAuthUseCase = new GoogleAuthUseCase(userRepositoryImpl);
 
 export class AuthController {
-
   constructor(
     private registerUseCase: RegisterUseCase,
     private verifyOTPUseCase: VerifyOTPUseCase,
     private resendOtpUseCase: ResendOtpUseCase,
     private loginUseCase: LoginUseCase,
     private checkUserStatusUseCase: CheckUserStatusUseCase,
-    private googleAuthUseCase: GoogleAuthUseCase,
+    private googleAuthUseCase: GoogleAuthUseCase
   ) {
     this.register = this.register.bind(this);
     this.verifyOTP = this.verifyOTP.bind(this);
@@ -37,44 +47,53 @@ export class AuthController {
     try {
       const validateData = RegisterZodSchema.parse(req.body);
       const result = await this.registerUseCase.execute(validateData);
-       res.cookie("token", result.user.token, {
+      res.cookie("token", result.user.token, {
         maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'strict',
-        secure: appConfig.nodeEnv !== 'development'
+        sameSite: "strict",
+        secure: appConfig.nodeEnv !== "development",
       });
 
       const { token: token, ...authUserWithoutToken } = result.user;
       const resultWithoutToken = {
         ...result,
         user: authUserWithoutToken,
-    };
-    res.status(200).json(resultWithoutToken);
+      };
+      res.status(200).json(resultWithoutToken);
     } catch (error) {
-      console.log("error : ",error);
+      console.log("error : ", error);
       HandleError.handle(error, res);
-    };
+    }
+  };
 
-  }
-
-   async verifyOTP(req: Request, res: Response) {
+  async verifyOTP(req: Request, res: Response) {
     try {
       const validateData = OTPVerificationZodSchema.parse(req.body);
       const { otp, verificationToken, role } = validateData;
-      if (!otp || !verificationToken || !role) throw new Error("Invalid request.");
-      const result = await this.verifyOTPUseCase.execute({otp, verificationToken, role});
+      if (!otp || !verificationToken || !role)
+        throw new Error("Invalid request.");
+      const result = await this.verifyOTPUseCase.execute({
+        otp,
+        verificationToken,
+        role,
+      });
       res.status(200).json(result);
     } catch (error) {
       HandleError.handle(error, res);
     }
   }
 
-   async resendOtp(req: Request, res: Response) {
+  async resendOtp(req: Request, res: Response) {
     try {
       const validateData = ResendOTPZodSchema.parse(req.body);
       const { role, verificationToken, email } = validateData;
-      if (!role || (!verificationToken && !email)) throw new Error("Invalid request.");
-      const result = await this.resendOtpUseCase.execute({role, verificationToken, email});
+      if (!role || (!verificationToken && !email))
+        throw new Error("Invalid request.");
+      const result = await this.resendOtpUseCase.execute({
+        role,
+        verificationToken,
+        email,
+      });
       res.status(200).json(result);
     } catch (error) {
       HandleError.handle(error, res);
@@ -86,22 +105,27 @@ export class AuthController {
       const validateData = LoginZodSchema.parse(req.body);
       const { email, password, role } = validateData;
       if (!email || !password || !role) throw new Error("Invalid request.");
-      const { success, message, user } = await this.loginUseCase.execute({email, password, role});
+      const { success, message, user } = await this.loginUseCase.execute({
+        email,
+        password,
+        role,
+      });
       res.cookie("token", user.token, {
         maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'strict',
-        secure: appConfig.nodeEnv !== 'development'
+        sameSite: "strict",
+        secure: appConfig.nodeEnv !== "development",
       });
       const { token: token, ...authUserWithoutToken } = user;
       const resultWithoutToken = {
-        success, message,
+        success,
+        message,
         user: authUserWithoutToken,
       };
-      console.log("resultWithoutToken : ",resultWithoutToken);
+      console.log("resultWithoutToken : ", resultWithoutToken);
       res.status(200).json(resultWithoutToken);
     } catch (error) {
-      console.log("error : ",error);
+      console.log("error : ", error);
       HandleError.handle(error, res);
     }
   }
@@ -109,7 +133,9 @@ export class AuthController {
   async logout(req: Request, res: Response) {
     try {
       res.clearCookie("token");
-      res.status(200).json({ success: true, message: "Logged out successfully." });
+      res
+        .status(200)
+        .json({ success: true, message: "Logged out successfully." });
     } catch (error) {
       HandleError.handle(error, res);
     }
@@ -118,9 +144,12 @@ export class AuthController {
   async checkUserStatus(req: Request, res: Response) {
     try {
       const user = req.user;
-      console.log("user : ",user);
-      if(!user) throw new Error("User not found")
-      const result = await this.checkUserStatusUseCase.execute({id: new Types.ObjectId(user.user), role: user.role});
+      console.log("user : ", user);
+      if (!user) throw new Error("User not found");
+      const result = await this.checkUserStatusUseCase.execute({
+        id: new Types.ObjectId(user.user),
+        role: user.role,
+      });
       res.status(result.status).json(result);
     } catch (error) {
       HandleError.handle(error, res);
@@ -128,38 +157,47 @@ export class AuthController {
   }
 
   // solve the redirected to home page
-
   async googleCallback(req: Request, res: Response) {
-  try {
-    if (!req.user) {
-      return res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
+    try {
+      if (!req.user) {
+        const frontendUrl =
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000"
+            : "https://ss-hr-fe.vercel.app";
+        return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
+      }
+
+      const result = await this.googleAuthUseCase.execute(req.user as any);
+
+      res.cookie("token", result.user.token, {
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "strict",
+        secure: appConfig.nodeEnv !== "development",
+      });
+
+      const frontendUrl =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : "https://ss-hr-fe.vercel.app";
+      res.redirect(`${frontendUrl}/`);
+    } catch (error) {
+      console.log("Google auth error:", error);
+      const frontendUrl =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : "https://ss-hr-fe.vercel.app";
+      res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
-
-    const result = await this.googleAuthUseCase.execute(req.user as any);
-    
-    res.cookie("token", result.user.token, {
-      maxAge: 2 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: appConfig.nodeEnv !== 'development'
-    });
-
-    res.redirect(`${appConfig.frontendUrl}/`);
-  } catch (error) {
-    console.log("Google auth error:", error);
-    res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
   }
 }
 
-
-}
-
 const authController = new AuthController(
-  registerUseCase, 
-  verifyOTPUseCase, 
-  resendOtpUseCase, 
-  loginUseCase, 
-  checkUserStatusUseCase, 
+  registerUseCase,
+  verifyOTPUseCase,
+  resendOtpUseCase,
+  loginUseCase,
+  checkUserStatusUseCase,
   googleAuthUseCase
 );
 
