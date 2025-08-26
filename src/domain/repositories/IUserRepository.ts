@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 import { User } from "../entities/user";
 import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
 
-
 export type CreateLocalUser = Pick<User, "fullName" | "email" | "password" | "verificationToken" | "role">;
 export type CreateGoogleUser = {
   fullName: User["fullName"];
