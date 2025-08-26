@@ -13,7 +13,7 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
   passport.use(new GoogleStrategy({
     clientID: googleClientConfig.googleClientId,
     clientSecret: googleClientConfig.googleClientSecret,
-    callbackURL: `${process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : process.env.BACKEND_URL}/api/auth/google/callback`,
+    callbackURL: `${process.env.NODE_ENV === 'development' ? process.env.GOOGLE_CALLBACK_LOCAL_URL : process.env.GOOGLE_CALLBACK_PRODUCTION_URL}/api/auth/google/callback`,
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       const existingUser = await userRepository.findUserByGoogleId(profile.id);
