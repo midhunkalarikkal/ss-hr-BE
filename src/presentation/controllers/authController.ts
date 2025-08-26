@@ -150,6 +150,8 @@ export class AuthController {
     res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
   }
 }
+
+
 }
 
 const authController = new AuthController(
