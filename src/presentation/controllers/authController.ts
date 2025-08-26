@@ -127,6 +127,8 @@ export class AuthController {
     }
   }
 
+  // solve the redirected to home page
+
   async googleCallback(req: Request, res: Response) {
   try {
     if (!req.user) {
@@ -148,6 +150,8 @@ export class AuthController {
     res.redirect(`${appConfig.frontendUrl}/login?error=google_auth_failed`);
   }
 }
+
+
 }
 
 const authController = new AuthController(
