@@ -127,6 +127,8 @@ export class AuthController {
     }
   }
 
+  // solve the redirected to home page
+
   async googleCallback(req: Request, res: Response) {
   try {
     if (!req.user) {
