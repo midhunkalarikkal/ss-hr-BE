@@ -1,20 +1,33 @@
 import { Types } from "mongoose";
 import { User } from "../entities/user";
-import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
+import {ApiPaginationRequest,ApiResponse} from "../../infrastructure/dtos/common.dts";
 
-export type CreateLocalUser = Pick<User, "fullName" | "email" | "password" | "verificationToken" | "role">;
+export type CreateLocalUser = Pick<
+  User,
+  "fullName" | "email" | "password" | "verificationToken" | "role"
+>;
+
+
 export type CreateGoogleUser = {
   fullName: User["fullName"];
   email: User["email"];
+  password: User["password"];
+  role: User["role"];
+  isVerified: User["isVerified"];
+  verificationToken: User["verificationToken"];
+  phoneOne: User["phoneOne"];
+  phoneTwo: User["phoneTwo"];
+  profileImage: User["profileImage"];
+  googleId: User["googleId"];
 };
+
 export type CreateUserProps = CreateLocalUser | CreateGoogleUser;
 
-
-export type AdminFetchAllUsers = Array<Pick<User, "_id" | "fullName" | "email" | "isBlocked" | "isVerified">>;
-
+export type AdminFetchAllUsers = Array<
+  Pick<User, "_id" | "fullName" | "email" | "isBlocked" | "isVerified">
+>;
 
 export interface IUserRepository {
-
   createUser(user: CreateUserProps): Promise<User>;
 
   verifyUser(verificationToken: string): Promise<User | null>;
@@ -23,7 +36,7 @@ export interface IUserRepository {
 
   findUserByEmail(email: string): Promise<User | null>;
 
-  findAllUsers({ page, limit }: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllUsers>>;
+  findAllUsers({page,limit,}: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllUsers>>;
 
   findUserById(userId: Types.ObjectId): Promise<User | null>;
 
