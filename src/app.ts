@@ -4,11 +4,13 @@ import morgan from 'morgan';
 import express from 'express';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import session from "express-session"
 import authRoutes from './presentation/routes/authRoutes';
 import { appConfig } from './config/env';
 // import userRouter from './interface/user/user.routes';
 // import adminRoutes from './interface/admin/admin.routes';
 // import providerRouter from './interface/provider/provider.router';
+import passport from './infrastructure/auth/passport';
 
 
 const app = express();
@@ -36,11 +38,22 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
 }));
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'mySecret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 
+  }
+}));
+
 app.use(compression());
 app.use(helmet());
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(passport.initialize());
 
 
 app.use('/api/auth',authRoutes);
@@ -56,6 +69,8 @@ app.use('/api/auth',authRoutes);
 //     environment: appConfig.nodeEnv
 //   });
 // });
+
+
 
 
 

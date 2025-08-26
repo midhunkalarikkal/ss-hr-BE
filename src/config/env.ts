@@ -18,7 +18,7 @@ export const jwtConfig = {
 export const appConfig = {
     port: process.env.PORT,
     nodeEnv : process.env.NODE_ENV,
-    frontendUrl: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL 
+    frontendUrl: process.env.NODE_ENV === "development" ? process.env.FRONTEND_URL : process.env.FRONTEND_PRODUCTION_URL 
 }
 
 export const adminConfig = {
