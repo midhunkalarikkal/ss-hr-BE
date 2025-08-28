@@ -2,12 +2,12 @@ import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { adminConfig } from '../../config/env';
 import { User } from '../../domain/entities/user';
-import { generateSignedUrl } from '../../config/aws_s3';
 import { JWTService } from '../../infrastructure/security/jwt';
 import { ApiResponse } from '../../infrastructure/dtos/common.dts';
 import { OTPService } from '../../infrastructure/service/otpService';
 import { handleUseCaseError } from '../../infrastructure/error/useCaseError';
 import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
+import { SignedUrlService } from '../../infrastructure/service/generateSignedUrl';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
 
@@ -120,7 +120,10 @@ export class ResendOtpUseCase {
 
 
 export class LoginUseCase {
-  constructor(private userRepositoryImpl: UserRepositoryImpl) { }
+  constructor(
+    private userRepositoryImpl: UserRepositoryImpl,
+    private signedUrlService: SignedUrlService
+  ) { }
 
   async execute(data: LoginRequest): Promise<LoginResponse> {
     try {
@@ -165,7 +168,7 @@ export class LoginUseCase {
         if (!urlParts) throw new Error("UrlParts error.");
         const s3Key = urlParts.slice(3).join('/');
         if (!s3Key) throw new Error("Image retrieving.");
-        const signedUrl = await generateSignedUrl(s3Key);
+        const signedUrl = await this.signedUrlService.generateSignedUrl(s3Key);
         if (!signedUrl) throw new Error("Image fetching error.");
         updateProfileImage = signedUrl
       }

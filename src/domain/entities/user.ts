@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export type Role = 'user' | 'admin' | 'superAdmin'
+export type Role = 'user' | 'admin' | 'superAdmin' | 'systemAdmin';
 
 export class User {
   constructor(
@@ -9,7 +9,7 @@ export class User {
     public email: string,
     public password: string,
     public role: Role,
-    public phoneOne: string,
+    public phone: string,
     public phoneTwo: string,
     public profileImage: string,
     public isBlocked: boolean,
