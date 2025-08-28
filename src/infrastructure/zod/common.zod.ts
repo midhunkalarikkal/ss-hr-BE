@@ -135,7 +135,7 @@ export const DateZodSchema = z.object({
 // User and Provider addess adding controllerz zod validation
 export const AddAddressZodSchema = z.object({
     addressLine: stringField("AddressLine",10,150,/^[a-zA-Z0-9 .,#-]{10,150}$/,"Address line must be 10–150 characters long and can only include letters, numbers, spaces, and the symbols . , # -") ,
-    phoneOne: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
+    phone: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
     phoneTwo: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
     place: stringField("Place",3,50,/^[a-zA-Z .-]{3,50}$/, "Place name must be 3–50 characters long and can only include letters, spaces, dots, and hyphens"),
     city: stringField("City",3,50,/^[a-zA-Z ]{3,50}$/,"City must only contain letters and spaces"),
@@ -153,7 +153,7 @@ export const AddAddressZodSchema = z.object({
   // user or provider username and phone updation controller
   export const UserOrProviderUpdateInfoZodSchema = z.object({
     username: stringField("Username",4,30,/^[a-zA-Z ]{4,30}$/,"Invalid username"),
-    phoneOne: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
+    phone: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
     phoneTwo: stringField("Phone",7,20,/^\+?[0-9\s\-().]{7,20}$/, "Invalid phone number. Only digits, spaces, dashes (-), dots (.), parentheses (), and an optional + at the beginning are allowed. Length must be between 7 to 20 characters."),
 });
 
@@ -177,3 +177,5 @@ export const RequestQueryCommonZodSchema = z.object({
     }),
 });
 
+
+// Validating the files

@@ -39,7 +39,7 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
         role: 'user',
         isVerified: true,
         verificationToken: '',
-        phoneOne: '',
+        phone: '',
         phoneTwo: '',
       });
 

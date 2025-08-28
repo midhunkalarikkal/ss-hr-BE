@@ -5,12 +5,11 @@ export class Application {
         public _id: Types.ObjectId,
         public userId: string,
         public jobId: string,
-        public cv: string, // file in aws_s3
+        public resume: string, // file in aws_s3
+        public applicationStatus: boolean,
         public createdAt: string,
         public updatedAt: string,
-    ) {
-
-    }
+    ) { }
 }
 
 

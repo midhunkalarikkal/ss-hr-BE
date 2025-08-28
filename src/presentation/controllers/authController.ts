@@ -13,10 +13,10 @@ import {
   RegisterUseCase,
   ResendOtpUseCase,
   VerifyOTPUseCase,
-} from "../../application/use-cases/authUseCases";
+} from "../../application/authUse-cases/authUseCases";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { Types } from "mongoose";
-import { GoogleAuthUseCase } from "../../application/use-cases/googleAuthUseCase";
+import { GoogleAuthUseCase } from "../../application/authUse-cases/googleAuthUseCase";
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const registerUseCase = new RegisterUseCase(userRepositoryImpl);

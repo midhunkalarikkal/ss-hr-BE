@@ -14,7 +14,7 @@ export class UserRepositoryImpl implements IUserRepository {
             user.email,
             user.password,
             user.role,
-            user.phoneOne,
+            user.phone,
             user.phoneTwo,
             user.profileImage,
             user.isBlocked,
