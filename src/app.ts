@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import express from 'express';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import session from "express-session"
+import session from "express-session";
 import authRoutes from './presentation/routes/authRoutes';
 import { appConfig } from './config/env';
 // import userRouter from './interface/user/user.routes';
