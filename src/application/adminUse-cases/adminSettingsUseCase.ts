@@ -1,6 +1,7 @@
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { FileUploadService } from "../../infrastructure/service/fileUpload";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
+import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
 import { validateFile } from "../../infrastructure/validator/imageFileValidator";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { CreateAdminRequest, CreateAdminResponse } from "../../infrastructure/dtos/admin.dtos";
@@ -13,7 +14,7 @@ export class CreateAdminUseCase {
 
     async execute(payload: CreateAdminRequest): Promise<ApiResponse<CreateAdminResponse>> {
         try {
-            const { fullName, email, password, phone, profileImage, role } = payload;
+            let { fullName, email, password, phone, profileImage, role } = payload;
 
             const isValidFile = validateFile(profileImage);
             if (!isValidFile) throw new Error("Invalid profile image file");
@@ -27,6 +28,7 @@ export class CreateAdminUseCase {
                 });
             }
 
+            password = await PasswordHasher.hashPassword(password);
             const adminData = { fullName, email, password, phone, role }
 
             const createdAdmin = await this.userRepositoryImpl.createUser({
@@ -35,7 +37,9 @@ export class CreateAdminUseCase {
                 isVerified: true,
             });
 
-            return { success: true, message: "New admin created", data: createdAdmin }
+            const { phoneTwo, isVerified, verificationToken, googleId, updatedAt, password: adminPassword, ...newAdmin } = createdAdmin;
+
+            return { success: true, message: "New admin created", data: newAdmin }
         } catch (error) {
             throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
         }
