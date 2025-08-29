@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { appConfig } from "../../config/env";
+import { appConfig, aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
 import {
   LoginZodSchema,
@@ -17,12 +17,16 @@ import {
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { Types } from "mongoose";
 import { GoogleAuthUseCase } from "../../application/authUse-cases/googleAuthUseCase";
+import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 
 const userRepositoryImpl = new UserRepositoryImpl();
-const registerUseCase = new RegisterUseCase(userRepositoryImpl);
+const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
+
+const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);const registerUseCase = new RegisterUseCase(userRepositoryImpl);
 const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
-const loginUseCase = new LoginUseCase(userRepositoryImpl);
+const loginUseCase = new LoginUseCase(userRepositoryImpl, signedUrlService);
 const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepositoryImpl);
 const googleAuthUseCase = new GoogleAuthUseCase(userRepositoryImpl);
 
@@ -179,14 +183,14 @@ export class AuthController {
       const frontendUrl =
         process.env.NODE_ENV === "development"
           ? "http://localhost:3000"
-          : "https://ss-hr-fe.vercel.app";
+          : "https://ss-hr-c-fe-fucg.vercel.app";
       res.redirect(`${frontendUrl}/`);
     } catch (error) {
       console.log("Google auth error:", error);
       const frontendUrl =
         process.env.NODE_ENV === "development"
           ? "http://localhost:3000"
-          : "https://ss-hr-fe.vercel.app";
+          : "https://ss-hr-vercel.vercel.app";
       res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
   }
