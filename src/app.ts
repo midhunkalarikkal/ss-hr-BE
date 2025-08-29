@@ -6,6 +6,7 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import session from "express-session"
 import authRoutes from './presentation/routes/authRoutes';
+import jobRoutes from './presentation/routes/jobRoutes';
 import { appConfig } from './config/env';
 // import userRouter from './interface/user/user.routes';
 // import adminRoutes from './interface/admin/admin.routes';
@@ -57,6 +58,7 @@ app.use(passport.initialize());
 
 
 app.use('/api/auth',authRoutes);
+app.use("/api",jobRoutes);
 // app.use('/api/user',userRouter);
 // app.use("/api/admin",adminRoutes);
 // app.use('/api/provider',providerRouter);
