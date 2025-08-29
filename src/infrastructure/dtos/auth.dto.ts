@@ -55,3 +55,6 @@ export interface CheckUserStatusRequest {
 export interface CheckUserStatusResponse extends CommonResponse {
     status: number;
 }
+
+
+
