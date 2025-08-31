@@ -7,7 +7,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: Role;
-  phoneOne: string;
+  phone: string;
   phoneTwo: string;
   profileImage: string;
   isVerified: boolean;
@@ -54,7 +54,7 @@ const UserSchema = new Schema<IUser>({
     type: Boolean,
     default: false
   },
-  phoneOne: {
+  phone: {
     type: String,
     default: null,
     minlength: [7, "Phone number must be at least 7 characters"],

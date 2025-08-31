@@ -13,6 +13,7 @@ export class Package {
         public priceIN: string,
         public priceUAE: string,
         public packageType: PackageType,
+        public packageDuration: number,
         public image: string,
         public features: string[],
         public createdAt: string,

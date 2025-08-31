@@ -4,12 +4,12 @@ import morgan from 'morgan';
 import express from 'express';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import session from "express-session"
+import session from "express-session";
 import authRoutes from './presentation/routes/authRoutes';
 import jobRoutes from './presentation/routes/jobRoutes';
+import adminRoutes from './presentation/routes/adminRoutes';
 import { appConfig } from './config/env';
 // import userRouter from './interface/user/user.routes';
-// import adminRoutes from './interface/admin/admin.routes';
 // import providerRouter from './interface/provider/provider.router';
 import passport from './infrastructure/auth/passport';
 
@@ -59,8 +59,8 @@ app.use(passport.initialize());
 
 app.use('/api/auth',authRoutes);
 app.use("/api/admin",jobRoutes);
+app.use("/api/admin",adminRoutes);
 // app.use('/api/user',userRouter);
-// app.use("/api/admin",adminRoutes);
 // app.use('/api/provider',providerRouter);
 
 // app.get('/api/health', (_req, res) => {
