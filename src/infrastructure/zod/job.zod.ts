@@ -47,3 +47,13 @@ export const GetJobByIdZodSchema = z.object({
 export const DeleteJobZodSchema = z.object({
   jobId: z.string().min(1, "Job ID is required")
 });
+
+
+export const GetAllJobsZodSchema = z.object({
+  page: z.string().optional().transform((val) => val ? parseInt(val, 10) : 1),
+  limit: z.string().optional().transform((val) => val ? parseInt(val, 10) : 10),
+  sortBy: z.string().optional().default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('desc')
+});
+
+export type GetAllJobsZodType = z.infer<typeof GetAllJobsZodSchema>;

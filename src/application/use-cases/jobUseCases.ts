@@ -1,8 +1,26 @@
+// src/application/use-cases/jobUseCases.ts
+
 import { Types } from "mongoose";
 import { Job } from "../../domain/entities/job";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
-import { CreateJobRequest, CreateJobResponse, UpdateJobRequest, UpdateJobResponse,GetJobByIdRequest,GetJobResponse,DeleteJobRequest,DeleteJobResponse } from "../../infrastructure/dtos/job.dto";
+import { CreateJobRequest, CreateJobResponse, UpdateJobRequest, UpdateJobResponse, GetJobByIdRequest, GetJobResponse, DeleteJobRequest, DeleteJobResponse } from "../../infrastructure/dtos/job.dto";
+
+export interface GetAllJobsRequest {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetAllJobsResponse {
+  success: boolean;
+  message: string;
+  data: Job[];
+  totalPages: number;
+  currentPage: number;
+  totalCount: number;
+}
 
 export class CreateJobUseCase {
   constructor(private jobRepository: JobRepositoryImpl) {}
@@ -132,6 +150,44 @@ export class DeleteJobUseCase {
       };
     } catch (error) {
       throw handleUseCaseError(error || "Unexpected error in DeleteJobUseCase");
+    }
+  }
+}
+
+export class GetAllJobsUseCase {
+  constructor(private jobRepository: JobRepositoryImpl) {}
+
+  async execute(request: GetAllJobsRequest): Promise<GetAllJobsResponse> {
+    try {
+      const page = request.page || 1;
+      const limit = request.limit || 10;
+      const skip = (page - 1) * limit;
+      const sortBy = request.sortBy || 'createdAt';
+      const sortOrder = request.sortOrder || 'desc';
+
+      const totalJobs = await this.jobRepository.getTotalCount();
+      
+      const jobs = await this.jobRepository.getAllJobs({
+        skip,
+        limit,
+        sortBy,
+        sortOrder
+      });
+
+      const totalPages = Math.ceil(totalJobs / limit);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
+
+      return {
+        success: true,
+        message: "Jobs retrieved successfully",
+        data: jobs,
+        totalPages,
+        currentPage: page,
+        totalCount: totalJobs
+      };
+    } catch (error) {
+      throw handleUseCaseError(error || "Unexpected error in GetAllJobsUseCase");
     }
   }
 }

@@ -58,7 +58,7 @@ app.use(passport.initialize());
 
 
 app.use('/api/auth',authRoutes);
-app.use("/api",jobRoutes);
+app.use("/api/admin",jobRoutes);
 // app.use('/api/user',userRouter);
 // app.use("/api/admin",adminRoutes);
 // app.use('/api/provider',providerRouter);

@@ -1,8 +1,10 @@
+// src/infrastructure/database/job/jobRepositoryImpl.ts
+
 import { Types } from "mongoose";
 import { IJob, JobModel } from "./jobModel";
 import { Job } from "../../../domain/entities/job";
 import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
-import { AdminFetchAllJobs, CreateJobProps, IJobRepository } from "../../../domain/repositories/IJobRepository";
+import { AdminFetchAllJobs, CreateJobProps, IJobRepository, GetAllJobsParams } from "../../../domain/repositories/IJobRepository";
 
 export class JobRepositoryImpl implements IJobRepository {
 
@@ -66,6 +68,30 @@ export class JobRepositoryImpl implements IJobRepository {
       };
     } catch (error) {
       throw new Error("Failed to fetch jobs from database.");
+    }
+  }
+
+  async getAllJobs(params: GetAllJobsParams): Promise<Job[]> {
+    try {
+      const sortOrder = params.sortOrder === 'desc' ? -1 : 1;
+      const sortObj: { [key: string]: 1 | -1 } = { [params.sortBy]: sortOrder };
+
+      const jobs = await JobModel.find({})
+        .sort(sortObj)
+        .skip(params.skip)
+        .limit(params.limit);
+
+      return jobs.map(job => this.mapToEntity(job));
+    } catch (error) {
+      throw new Error("Failed to fetch jobs from database.");
+    }
+  }
+
+  async getTotalCount(): Promise<number> {
+    try {
+      return await JobModel.countDocuments({});
+    } catch (error) {
+      throw new Error("Failed to get total job count.");
     }
   }
 

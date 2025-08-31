@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { HandleError } from "../../infrastructure/error/error";
-import { CreateJobZodSchema, UpdateJobZodSchema, GetJobByIdZodSchema, DeleteJobZodSchema } from "../../infrastructure/zod/job.zod";
-import {CreateJobUseCase,UpdateJobUseCase,GetJobByIdUseCase,DeleteJobUseCase} from "../../application/use-cases/jobUseCases";
+import { CreateJobZodSchema, UpdateJobZodSchema, GetJobByIdZodSchema, DeleteJobZodSchema,GetAllJobsZodSchema} from "../../infrastructure/zod/job.zod";
+import {CreateJobUseCase,UpdateJobUseCase,GetJobByIdUseCase,DeleteJobUseCase,GetAllJobsUseCase} from "../../application/use-cases/jobUseCases";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 
 const jobRepositoryImpl = new JobRepositoryImpl();
@@ -10,18 +10,32 @@ const createJobUseCase = new CreateJobUseCase(jobRepositoryImpl);
 const updateJobUseCase = new UpdateJobUseCase(jobRepositoryImpl);
 const getJobByIdUseCase = new GetJobByIdUseCase(jobRepositoryImpl);
 const deleteJobUseCase = new DeleteJobUseCase(jobRepositoryImpl);
+const getAllJobsUseCase = new GetAllJobsUseCase(jobRepositoryImpl);
 
 export class JobController {
   constructor(
     private createJobUseCase: CreateJobUseCase,
     private updateJobUseCase: UpdateJobUseCase,
     private getJobByIdUseCase: GetJobByIdUseCase,
-    private deleteJobUseCase: DeleteJobUseCase
+    private deleteJobUseCase: DeleteJobUseCase,
+    private getAllJobsUseCase: GetAllJobsUseCase
   ) {
     this.createJob = this.createJob.bind(this);
     this.updateJob = this.updateJob.bind(this);
     this.getJobById = this.getJobById.bind(this);
     this.deleteJob = this.deleteJob.bind(this);
+    this.getAllJobs = this.getAllJobs.bind(this);
+  }
+
+  async getAllJobs(req: Request, res: Response): Promise<void> {
+    try {
+      const validatedData = GetAllJobsZodSchema.parse(req.query);
+      const result = await this.getAllJobsUseCase.execute(validatedData);
+      res.status(200).json(result);
+    } catch (error) {
+      console.log("Get all jobs error:", error);
+      HandleError.handle(error, res);
+    }
   }
 
   async createJob(req: Request, res: Response): Promise<void> {
@@ -94,7 +108,8 @@ const jobController = new JobController(
   createJobUseCase,
   updateJobUseCase,
   getJobByIdUseCase,
-  deleteJobUseCase
+  deleteJobUseCase,
+  getAllJobsUseCase
 );
 
 export { jobController };
