@@ -160,6 +160,7 @@ export class AuthController {
     }
   }
 
+
   // solve the redirected to home page
   async googleCallback(req: Request, res: Response) {
     try {
@@ -195,6 +196,7 @@ export class AuthController {
     }
   }
 }
+
 
 const authController = new AuthController(
   registerUseCase,
