@@ -20,7 +20,7 @@ export class RegisterUseCase {
     try {
       const { email, password, fullName, role } = data;
 
-      const existingUser = await this.userRepositoryImpl.findUserByEmail(email);
+      const existingUser = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
       if (existingUser?.isVerified) throw new Error("User already exists with this email");
 
       const hashedPassword = await PasswordHasher.hashPassword(password);
@@ -94,8 +94,8 @@ export class ResendOtpUseCase {
       let user: User | null = null;
 
       if (email && role) {
-        if (role === "USER") {
-          user = await this.userRepositoryImpl.findUserByEmail(email);
+        if (role === "user") {
+          user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
         }
 
       } else if (verificationToken && role) {
@@ -136,8 +136,8 @@ export class LoginUseCase {
 
       let user: User | null = null;
 
-      if (role === "user") { // TODO need to ahandle admin
-        user = await this.userRepositoryImpl.findUserByEmail(email);
+      if (role === "user" || role === "admin") { // TODO need to ahandle admin
+        user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
       } else if (role === "superAdmin") {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
           throw new Error("Invalid credentials.");
@@ -157,7 +157,7 @@ export class LoginUseCase {
 
       if (!valid) throw new Error("Invalid credentials.");
 
-      const token = JWTService.generateToken({ id: user._id, role: role });
+      const token = JWTService.generateToken({ userId: user._id, role: role });
 
       let updateProfileImage;
 

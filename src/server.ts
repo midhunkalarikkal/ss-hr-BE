@@ -1,8 +1,7 @@
-import app from "./app";
 import dotenv from "dotenv";
 import { appConfig } from "./config/env";
+import { socketServer } from "./infrastructure/lib/socket.io";
 import { connectDB, disconnectDB } from "./config/database/connection";
-
 
 dotenv.config();
 
@@ -12,7 +11,7 @@ async function startServer() {
   try {
     await connectDB();
 
-    const server = app.listen(port, () => {
+    const server = socketServer.listen(port, () => {
       console.log(`🚀 Server running on port ${port}`);
     });
 

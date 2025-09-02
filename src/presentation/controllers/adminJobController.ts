@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
 import { Types } from "mongoose";
+import { Request, Response } from "express";
 import { HandleError } from "../../infrastructure/error/error";
-import { CreateJobZodSchema, UpdateJobZodSchema, GetJobByIdZodSchema, DeleteJobZodSchema,GetAllJobsZodSchema} from "../../infrastructure/zod/job.zod";
-import {CreateJobUseCase,UpdateJobUseCase,GetJobByIdUseCase,DeleteJobUseCase,GetAllJobsUseCase} from "../../application/use-cases/jobUseCases";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
+import {CreateJobUseCase,UpdateJobUseCase,GetJobByIdUseCase,DeleteJobUseCase,GetAllJobsUseCase} from "../../application/use-cases/jobUseCases";
+import { CreateJobZodSchema, UpdateJobZodSchema, GetJobByIdZodSchema, DeleteJobZodSchema,GetAllJobsZodSchema} from "../../infrastructure/zod/job.zod";
 
 const jobRepositoryImpl = new JobRepositoryImpl();
 const createJobUseCase = new CreateJobUseCase(jobRepositoryImpl);
@@ -12,7 +12,7 @@ const getJobByIdUseCase = new GetJobByIdUseCase(jobRepositoryImpl);
 const deleteJobUseCase = new DeleteJobUseCase(jobRepositoryImpl);
 const getAllJobsUseCase = new GetAllJobsUseCase(jobRepositoryImpl);
 
-export class JobController {
+export class AdminJobController {
   constructor(
     private createJobUseCase: CreateJobUseCase,
     private updateJobUseCase: UpdateJobUseCase,
@@ -104,7 +104,7 @@ export class JobController {
   }
 }
 
-const jobController = new JobController(
+const adminJobController = new AdminJobController(
   createJobUseCase,
   updateJobUseCase,
   getJobByIdUseCase,
@@ -112,4 +112,4 @@ const jobController = new JobController(
   getAllJobsUseCase
 );
 
-export { jobController };
+export { adminJobController };

@@ -3,16 +3,19 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import express from 'express';
 import compression from 'compression';
-import cookieParser from 'cookie-parser';
 import session from "express-session";
-import authRoutes from './presentation/routes/authRoutes';
-import jobRoutes from './presentation/routes/jobRoutes';
-import adminRoutes from './presentation/routes/adminRoutes';
+import cookieParser from 'cookie-parser';
 import { appConfig } from './config/env';
-// import userRouter from './interface/user/user.routes';
-// import providerRouter from './interface/provider/provider.router';
 import passport from './infrastructure/auth/passport';
 
+import authRoutes from './presentation/routes/authRoutes';
+import messageRoutes from './presentation/routes/messageRoutes';
+
+import adminJobRoutes from './presentation/routes/adminJobRoutes';
+import adminChatRoutes from './presentation/routes/adminChatRoutes';
+import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
+
+import userChatRoutes from './presentation/routes/userChatRoutes';
 
 const app = express();
 
@@ -58,39 +61,12 @@ app.use(passport.initialize());
 
 
 app.use('/api/auth',authRoutes);
-app.use("/api/admin",jobRoutes);
-app.use("/api/admin",adminRoutes);
-// app.use('/api/user',userRouter);
-// app.use('/api/provider',providerRouter);
 
-// app.get('/api/health', (_req, res) => {
-//   res.status(200).json({
-//     success: true,
-//     message: 'SS HR Backend API is running!',
-//     timestamp: new Date().toISOString(),
-//     environment: appConfig.nodeEnv
-//   });
-// });
+app.use("/api/admin/settings",adminSettingsRoutes);
+app.use('/api/admin/jobs',adminJobRoutes);
+app.use('/api/admin/chat',adminChatRoutes);
 
+app.use('/api/user/chat',userChatRoutes);
 
-
-
-
-// app.get('/api', (_req, res) => {
-//   res.status(200).json({
-//     success: true,
-//     message: 'SS HR Consultancy API v1.0',
-//     endpoints: {
-//       health: '/api/health',
-//       auth: {
-//         register: 'POST /api/auth/register',
-//         login: 'POST /api/auth/login',
-//         logout: 'POST /api/auth/logout',
-//         verify: 'GET /api/auth/verify'
-//       }
-//     }
-//   });
-//   console.log("sended")
-// });
-
+app.use('/api/message',messageRoutes);
 export default app;

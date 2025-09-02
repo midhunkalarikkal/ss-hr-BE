@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { IUser, UserModel } from "./userModel";
-import { User } from "../../../domain/entities/user";
-import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
+import { Role, User } from "../../../domain/entities/user";
+import { ApiPaginationRequest, ApiResponse, FetchUsersForChatSideBar } from "../../dtos/common.dts";
 import { AdminFetchAllUsers, CreateUserProps, IUserRepository } from "../../../domain/repositories/IUserRepository";
 
 
@@ -98,11 +98,35 @@ export class UserRepositoryImpl implements IUserRepository {
 
     async findUserByGoogleId(googleId: string): Promise<User | null> {
         try {
-            const user = await UserModel.findOne({googleId});
+            const user = await UserModel.findOne({ googleId });
             return user ? this.mapToEntity(user) : null;
         } catch (error) {
-            console.log("findUserByGoogleId error : error");
+            console.log("findUserByGoogleId error : ", error);
             throw new Error("User finding using googleId failed");
+        }
+    }
+
+    async findAllUsersForChatSidebar(isAdmin: boolean): Promise<FetchUsersForChatSideBar | null> {
+        try {
+            const filter = isAdmin
+                ? { role: "user" }
+                : { role: { $in: ["admin", "superAdmin"] } };
+
+            const users = await UserModel.find(filter,{ _id: 1, fullName: 1, profileImage: 1});
+
+            return users.length > 0 ? users.map(user => this.mapToEntity(user)) : null;
+        } catch (error) {
+            console.log("findAllUsersForChatSidebar error :", error);
+            throw new Error(`${isAdmin ? "Users" : "Chat Support"} fetching failed`);
+        }
+    }
+
+    async findUserByEmailWithRole(email: string, role: Role): Promise<User | null> {
+        try {
+            const user = await UserModel.findOne({email, role});
+            return user ? this.mapToEntity(user) : null;
+        } catch (error) {
+            throw new Error("User not found.");
         }
     }
 }

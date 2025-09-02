@@ -10,16 +10,12 @@ export class SignedUrlService {
     private bucketName: string = aws_s3Config.bucketName!,
     private signedUrlRepositoryImpl: SignedUrlRepositoryImpl
 ) {}
-  async generateSignedUrl(key: string, expires: number = 172800): Promise<string> {
+  async generateSignedUrl(s3Key: string, expires: number = 172800): Promise<string> {
 
-    const existing = await this.signedUrlRepositoryImpl.findOneSignedUrl(key);
+    const existing = await this.signedUrlRepositoryImpl.findOneSignedUrl(s3Key);
     if (existing && existing.expiresAt > new Date()) {
       return existing.url;
     }
-
-    const urlParts = key.split('/');
-    const s3Key = urlParts.slice(3).join('/');
-    if (!s3Key) throw new Error('Invalid S3 key');
 
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
@@ -29,7 +25,7 @@ export class SignedUrlService {
     const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: expires });
     const expiresAt = new Date(Date.now() + expires * 1000);
 
-    await this.signedUrlRepositoryImpl.findOneSignedUrlAndUpdate(key,signedUrl,expiresAt);
+    await this.signedUrlRepositoryImpl.findOneSignedUrlAndUpdate(s3Key,signedUrl,expiresAt);
 
     return signedUrl;
   }

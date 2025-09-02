@@ -1,7 +1,6 @@
 import { Upload } from "@aws-sdk/lib-storage";
 import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
-import { SignedUrlService } from "./generateSignedUrl";
 import { S3KeyGenerator } from "../helper/generateS3key";
 
 export interface UploadFileOptions {
@@ -13,18 +12,20 @@ export interface UploadFileOptions {
 export class FileUploadService {
   constructor(
     private s3: S3Client,
-    private signedUrlService: SignedUrlService,
     private s3KeyGenerator: S3KeyGenerator,
 ) {}
 
   async uploadFile({ folder, userId, file }: UploadFileOptions): Promise<string> {
+
+    const s3Key = await this.s3KeyGenerator.generateS3Key({
+      folder,
+      userId,
+      originalname: file.originalname,
+    });
+
     const params = {
       Bucket: aws_s3Config.bucketName as string,
-      Key: await this.s3KeyGenerator.generateS3Key({
-        folder,
-        userId,
-        originalname: file.originalname,
-      }),
+      Key: s3Key,
       Body: file.buffer,
       ContentType: file.mimetype,
     };
@@ -34,10 +35,7 @@ export class FileUploadService {
       params,
     });
 
-    const s3UploadResponse = await upload.done();
-    if (!s3UploadResponse) throw new Error("File upload failed");
-
-    const fileUrl = s3UploadResponse.Location ?? "";
-    return await this.signedUrlService.generateSignedUrl(fileUrl);
+    await upload.done();
+    return s3Key;
   }
 }

@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import { User } from "../entities/user";
-import {ApiPaginationRequest,ApiResponse} from "../../infrastructure/dtos/common.dts";
+import { Role, User } from "../entities/user";
+import {ApiPaginationRequest,ApiResponse, FetchUsersForChatSideBar} from "../../infrastructure/dtos/common.dts";
 
 export type CreateLocalUser = Pick<User,"fullName" | "email" | "password" | "verificationToken" | "role">;
 export type CreateGoogleUser = Pick<User,"fullName" | "email" | "password" | "isVerified" | "verificationToken" | "role" | "phone" | "phoneTwo" | "profileImage" | "googleId">;
@@ -18,9 +18,13 @@ export interface IUserRepository {
 
   findUserByEmail(email: string): Promise<User | null>;
 
+  findUserByEmailWithRole(email: string, role: Role): Promise<User | null>;
+
   findAllUsers({page,limit,}: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllUsers>>;
 
   findUserById(userId: Types.ObjectId): Promise<User | null>;
 
   findUserByGoogleId(googleId: string): Promise<User | null>;
+
+  findAllUsersForChatSidebar(isAdmin: boolean): Promise<FetchUsersForChatSideBar | null>
 }
