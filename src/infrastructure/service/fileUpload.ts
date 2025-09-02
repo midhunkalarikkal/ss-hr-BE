@@ -2,7 +2,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { S3Client } from "@aws-sdk/client-s3";
 import { aws_s3Config } from "../../config/env";
 import { SignedUrlService } from "./generateSignedUrl";
-import { S3KeyGenerator } from "../helper/generates3key";
+import { S3KeyGenerator } from "../helper/generateS3key";
 
 export interface UploadFileOptions {
   folder: string;
