@@ -12,7 +12,7 @@ export class GoogleAuthUseCase {
   async execute(user: User): Promise<LoginResponse> {
     try {
 
-      const token = JWTService.generateToken({ id: user._id, role: user.role });
+      const token = JWTService.generateToken({ userId: user._id, role: user.role });
 
       //TODO google user creation
 
