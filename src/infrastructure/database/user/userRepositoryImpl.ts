@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import { IUser, UserModel } from "./userModel";
 import { Role, User } from "../../../domain/entities/user";
-import {ApiPaginationRequest,ApiResponse,FetchUsersForChatSideBar,} from "../../dtos/common.dts";
-import {AdminFetchAllUsers,CreateUserProps,IUserRepository} from "../../../domain/repositories/IUserRepository";
+import {ApiPaginationRequest,ApiResponse,FetchUsersForChatSideBar} from "../../dtos/common.dts";
+import { AdminFetchAllUsers,CreateUserProps,IUserRepository} from "../../../domain/repositories/IUserRepository";
 
 export class UserRepositoryImpl implements IUserRepository {
   private mapToEntity(user: IUser): User {
@@ -101,10 +101,13 @@ export class UserRepositoryImpl implements IUserRepository {
           {},
           {
             _id: 1,
+            serialNumber: 1,
             fullName: 1,
             email: 1,
+            role: 1,
             isBlocked: 1,
-            isEmailVerified: 1,
+            isVerified: 1,
+            createdAt: 1,
           }
         )
           .skip(skip)
@@ -112,6 +115,7 @@ export class UserRepositoryImpl implements IUserRepository {
           .lean(),
         UserModel.countDocuments(),
       ]);
+
       const totalPages = Math.ceil(totalCount / limit);
       return {
         data: users.map(this.mapToEntity),
