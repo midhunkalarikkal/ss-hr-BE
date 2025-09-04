@@ -7,3 +7,4 @@ const router = Router();
 router.get('/admins', authMiddleware, userController.getAdminsForChatSidebar);
 
 export default router;
+
