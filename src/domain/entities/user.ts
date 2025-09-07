@@ -5,6 +5,7 @@ export type Role = 'user' | 'admin' | 'superAdmin' | 'systemAdmin';
 export class User {
   constructor(
     public _id: Types.ObjectId,
+    public serialNumber : string,
     public fullName: string,
     public email: string,
     public password: string,

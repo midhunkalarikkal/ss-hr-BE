@@ -14,11 +14,11 @@ import messageRoutes from './presentation/routes/messageRoutes';
 import adminJobRoutes from './presentation/routes/adminJobRoutes';
 import adminChatRoutes from './presentation/routes/adminChatRoutes';
 import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
+import { adminUsersRoutes } from './presentation/routes/userRoutes';
 
 import userChatRoutes from './presentation/routes/userChatRoutes';
 
 const app = express();
-
 
 if (appConfig.nodeEnv === 'development') {
   app.use(morgan('dev'));
@@ -61,12 +61,11 @@ app.use(passport.initialize());
 
 
 app.use('/api/auth',authRoutes);
-
 app.use("/api/admin/settings",adminSettingsRoutes);
 app.use('/api/admin/jobs',adminJobRoutes);
 app.use('/api/admin/chat',adminChatRoutes);
-
+app.use('/api/admin/users',adminUsersRoutes);
 app.use('/api/user/chat',userChatRoutes);
-
 app.use('/api/message',messageRoutes);
+
 export default app;
