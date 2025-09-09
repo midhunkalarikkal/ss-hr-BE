@@ -1,4 +1,3 @@
-// presentation/controllers/testimonialController.ts
 import { Request, Response } from "express";
 import { Types } from 'mongoose';
 import { HandleError } from "../../infrastructure/error/error";
