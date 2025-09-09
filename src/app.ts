@@ -15,8 +15,9 @@ import adminJobRoutes from './presentation/routes/adminJobRoutes';
 import adminChatRoutes from './presentation/routes/adminChatRoutes';
 import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
 import { adminUsersRoutes } from './presentation/routes/userRoutes';
-
+import { adminTestimonialRoutes } from './presentation/routes/testimonialRoutes';
 import userChatRoutes from './presentation/routes/userChatRoutes';
+
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use("/api/admin/settings",adminSettingsRoutes);
 app.use('/api/admin/jobs',adminJobRoutes);
 app.use('/api/admin/chat',adminChatRoutes);
 app.use('/api/admin/users',adminUsersRoutes);
+app.use("/api/admin/testimonials",adminTestimonialRoutes);
 app.use('/api/user/chat',userChatRoutes);
 app.use('/api/message',messageRoutes);
 
