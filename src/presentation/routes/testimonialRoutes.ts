@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { testimonialController } from "../controllers/testimonialController";
 import { authMiddleware } from "../middleware/authMiddleware";
-import { createTestimonialSchema, updateTestimonialSchema, testimonialIdSchema } from "../../infrastructure/zod/testimonial.zod";
 
 const testimonialRoutes = Router();
 
