@@ -16,6 +16,12 @@ export class Package {
         public packageDuration: number,
         public image: string,
         public features: string[],
+        public food: boolean,
+        public accommodation: boolean,
+        public travelCard: boolean,
+        public utilityBills: boolean,
+        public airportPickup: boolean,
+        public jobGuidance: boolean,
         public createdAt: string,
         public updatedAt: string,
     ) { }
