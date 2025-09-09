@@ -1,5 +1,5 @@
 import { jwtConfig } from "../../config/env";
-import jwt, { JwtPayload, SignOptions, Secret } from "jsonwebtoken";
+import jwt, { JwtPayload, Secret ,SignOptions, } from "jsonwebtoken";
 
 const JWT_SECRET = jwtConfig.jwtSecret as Secret;
 const JWT_EXPIRES_IN = jwtConfig.jwtExpiresIn as SignOptions["expiresIn"] || "2d";

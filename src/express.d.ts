@@ -1,7 +1,7 @@
 import { Request } from "express";
 
 export interface DecodedUser {
-    user: string;
+    userId: string;
     role: string;
     exp: number;
     iat: number;

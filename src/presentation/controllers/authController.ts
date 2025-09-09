@@ -1,23 +1,24 @@
+import { Types } from "mongoose";
 import { Request, Response } from "express";
-import { appConfig, aws_s3Config } from "../../config/env";
-import { HandleError } from "../../infrastructure/error/error";
+import { DecodedUser } from "../../express";
 import {
   LoginZodSchema,
-  OTPVerificationZodSchema,
   RegisterZodSchema,
   ResendOTPZodSchema,
+  OTPVerificationZodSchema,
 } from "../../infrastructure/zod/auth.zod";
 import {
-  CheckUserStatusUseCase,
   LoginUseCase,
   RegisterUseCase,
   ResendOtpUseCase,
   VerifyOTPUseCase,
+  CheckUserStatusUseCase,
 } from "../../application/authUse-cases/authUseCases";
-import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
-import { Types } from "mongoose";
-import { GoogleAuthUseCase } from "../../application/authUse-cases/googleAuthUseCase";
+import { appConfig, aws_s3Config } from "../../config/env";
+import { HandleError } from "../../infrastructure/error/error";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { GoogleAuthUseCase } from "../../application/authUse-cases/googleAuthUseCase";
+import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 
 const userRepositoryImpl = new UserRepositoryImpl();
@@ -147,11 +148,10 @@ export class AuthController {
 
   async checkUserStatus(req: Request, res: Response) {
     try {
-      const user = req.user;
-      console.log("user : ", user);
+      const user = (req.user as DecodedUser);
       if (!user) throw new Error("User not found");
       const result = await this.checkUserStatusUseCase.execute({
-        id: new Types.ObjectId(user.user),
+        id: new Types.ObjectId(user.userId),
         role: user.role,
       });
       res.status(result.status).json(result);
@@ -159,6 +159,7 @@ export class AuthController {
       HandleError.handle(error, res);
     }
   }
+
 
   // solve the redirected to home page
   async googleCallback(req: Request, res: Response) {
@@ -195,6 +196,7 @@ export class AuthController {
     }
   }
 }
+
 
 const authController = new AuthController(
   registerUseCase,

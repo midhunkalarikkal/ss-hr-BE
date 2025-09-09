@@ -1,3 +1,5 @@
+import { User } from "../../domain/entities/user";
+
 export interface CommonResponse {
   success?: boolean;
   message?: string;
@@ -15,3 +17,6 @@ export interface ApiResponse<T = unknown> extends CommonResponse{
     totalCount?: number;
     data?: T;
 }
+
+
+export type FetchUsersForChatSideBar = Array<Pick<User, "_id" | "fullName" | "profileImage">>;
