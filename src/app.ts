@@ -15,6 +15,7 @@ import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
 import { adminUsersRoutes } from './presentation/routes/userRoutes';
 import { adminTestimonialRoutes } from './presentation/routes/testimonialRoutes';
 import {adminPackageRoutes} from "./presentation/routes/packageRoutes";
+import {adminPaymentRoutes} from "./presentation/routes/paymentRoutes"
 
 import userChatRoutes from './presentation/routes/userChatRoutes';
 
@@ -68,6 +69,7 @@ app.use('/api/admin/chat',adminChatRoutes);
 app.use('/api/admin/users',adminUsersRoutes);
 app.use("/api/admin/testimonials",adminTestimonialRoutes);
 app.use('/api/admin/packages', adminPackageRoutes);
+app.use('/api/admin/payments', adminPaymentRoutes);
 app.use('/api/user/chat',userChatRoutes);
 app.use('/api/message',messageRoutes);
 
