@@ -1,121 +1,78 @@
-// src/application/use-cases/jobUseCases.ts
-
 import { Types } from "mongoose";
-import { Job } from "../../domain/entities/job";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
-import { CreateJobRequest, CreateJobResponse, UpdateJobRequest, UpdateJobResponse, GetJobByIdRequest, GetJobResponse, DeleteJobRequest, DeleteJobResponse } from "../../infrastructure/dtos/job.dto";
-
-export interface GetAllJobsRequest {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface GetAllJobsResponse {
-  success: boolean;
-  message: string;
-  data: Job[];
-  totalPages: number;
-  currentPage: number;
-  totalCount: number;
-}
+import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
+import { AdminCreateNewJob, AdminFetchAllJobs, AdminFetchJobDetailsResponse, AdminUpdateJob } from "../../infrastructure/dtos/adminJob.dtos";
 
 export class CreateJobUseCase {
-  constructor(private jobRepository: JobRepositoryImpl) {}
 
-  async execute(data: CreateJobRequest): Promise<CreateJobResponse> {
+  constructor(private jobRepository: JobRepositoryImpl) { }
+
+  async execute(payload: AdminCreateNewJob): Promise<ApiResponse> {
     try {
-      const { companyName, designation, vacancy } = data;
-
-      if (!companyName || !designation || vacancy < 1) {
+      const { benifits, companyName, designation, industry, jobDescription, nationality, salary, skills, vacancy } = payload;
+      if (
+        !companyName ||
+        !designation ||
+        !industry ||
+        !jobDescription ||
+        !nationality ||
+        !salary ||
+        !benifits ||
+        !skills ||
+        !vacancy
+      ) {
         throw new Error("All fields are required and vacancy must be at least 1");
       }
 
-      const job = await this.jobRepository.createJob({
-        companyName,
-        designation,
-        vacancy
-      });
+      const job = await this.jobRepository.createJob(payload);
+      if(!job) throw new Error("Job creating failed");
 
-      return {
-        success: true,
-        message: "Job created successfully",
-        job: {
-          _id: job._id,
-          companyName: job.companyName,
-          designation: job.designation,
-          vacancy: job.vacancy,
-          createdAt: job.createdAt,
-          updatedAt: job.updatedAt,
-        }
-      };
+      return { success: true, message: "Job created successfully" };
+
     } catch (error) {
       throw handleUseCaseError(error || "Unexpected error in CreateJobUseCase");
     }
   }
 }
 
-export class UpdateJobUseCase {
-  constructor(private jobRepository: JobRepositoryImpl) {}
+export class GetAllJobsUseCase {
+  constructor(private jobRepository: JobRepositoryImpl) { }
 
-  async execute(data: UpdateJobRequest): Promise<UpdateJobResponse> {
+  async execute(payload: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllJobs>> {
     try {
-      const { _id, companyName, designation, vacancy } = data;
 
-      if (!_id) {
-        throw new Error("Job ID is required");
-      }
-
-      const existingJob = await this.jobRepository.findJobById(_id);
-      if (!existingJob) {
-        throw new Error("Job not found");
-      }
-
-      if (companyName !== undefined) existingJob.companyName = companyName;
-      if (designation !== undefined) existingJob.designation = designation;
-      if (vacancy !== undefined) {
-        if (vacancy < 1) throw new Error("Vacancy must be at least 1");
-        existingJob.vacancy = vacancy;
-      }
-
-      const updatedJob = await this.jobRepository.updateJob(existingJob);
-      if (!updatedJob) {
-        throw new Error("Failed to update job");
-      }
+      const { page, limit } = payload;
+      const jobs = await this.jobRepository.findAllJobs({ page, limit },true)
 
       return {
         success: true,
-        message: "Job updated successfully",
-        job: updatedJob
+        message: "Jobs retrieved successfully",
+        data: jobs as AdminFetchAllJobs
       };
     } catch (error) {
-      throw handleUseCaseError(error || "Unexpected error in UpdateJobUseCase");
+      throw handleUseCaseError(error || "Unexpected error in GetAllJobsUseCase");
     }
   }
 }
 
 export class GetJobByIdUseCase {
-  constructor(private jobRepository: JobRepositoryImpl) {}
+  constructor(private jobRepository: JobRepositoryImpl) { }
 
-  async execute(data: GetJobByIdRequest): Promise<GetJobResponse> {
+  async execute(jobId: Types.ObjectId ): Promise<ApiResponse<AdminFetchJobDetailsResponse>> {
     try {
-      const { jobId } = data;
 
       if (!jobId) {
         throw new Error("Job ID is required");
       }
 
-      const job = await this.jobRepository.findJobById(jobId);
-      if (!job) {
-        throw new Error("Job not found");
-      }
+      const job = await this.jobRepository.findJobById(jobId, true);
+      if (!job) throw new Error("Job not found");
 
       return {
         success: true,
         message: "Job retrieved successfully",
-        job
+        data: job as AdminFetchJobDetailsResponse
       };
     } catch (error) {
       throw handleUseCaseError(error || "Unexpected error in GetJobByIdUseCase");
@@ -123,71 +80,53 @@ export class GetJobByIdUseCase {
   }
 }
 
-export class DeleteJobUseCase {
-  constructor(private jobRepository: JobRepositoryImpl) {}
+export class UpdateJobUseCase {
+  constructor(private jobRepository: JobRepositoryImpl) { }
 
-  async execute(data: DeleteJobRequest): Promise<DeleteJobResponse> {
+  async execute(payload: AdminUpdateJob): Promise<ApiResponse> {
     try {
-      const { jobId } = data;
+      const { jobId, updatedData } = payload;
 
-      if (!jobId) {
-        throw new Error("Job ID is required");
-      }
+      if (!jobId) throw new Error("Job ID is required");
 
-      const existingJob = await this.jobRepository.findJobById(jobId);
-      if (!existingJob) {
-        throw new Error("Job not found");
-      }
+      const existingJob = await this.jobRepository.findJobById(jobId, true);
+      if (!existingJob) throw new Error("Job not found")
+
+      const updatedJob = await this.jobRepository.updateJob(jobId, updatedData);
+      if (!updatedJob) throw new Error("Failed to update job")
+
+      return {
+        success: true,
+        message: "Job updated successfully",
+      };
+    } catch (error) {
+      throw handleUseCaseError(error || "Unexpected error in UpdateJobUseCase");
+    }
+  }
+}
+
+
+export class DeleteJobUseCase {
+  constructor(private jobRepository: JobRepositoryImpl) { }
+
+  async execute(jobId: Types.ObjectId): Promise<ApiResponse> {
+    try {
+
+      if (!jobId) throw new Error("Job ID is required");
+
+      const existingJob = await this.jobRepository.findJobById(jobId, true);
+      if (!existingJob) throw new Error("Job not found");
 
       const deleted = await this.jobRepository.deleteJob(jobId);
-      if (!deleted) {
-        throw new Error("Failed to delete job");
-      }
+      if (!deleted) throw new Error("Failed to delete job");
 
       return {
         success: true,
         message: "Job deleted successfully"
       };
+      
     } catch (error) {
       throw handleUseCaseError(error || "Unexpected error in DeleteJobUseCase");
-    }
-  }
-}
-
-export class GetAllJobsUseCase {
-  constructor(private jobRepository: JobRepositoryImpl) {}
-
-  async execute(request: GetAllJobsRequest): Promise<GetAllJobsResponse> {
-    try {
-      const page = request.page || 1;
-      const limit = request.limit || 10;
-      const skip = (page - 1) * limit;
-      const sortBy = request.sortBy || 'createdAt';
-      const sortOrder = request.sortOrder || 'desc';
-
-      const totalJobs = await this.jobRepository.getTotalCount();
-      
-      const jobs = await this.jobRepository.getAllJobs({
-        skip,
-        limit,
-        sortBy,
-        sortOrder
-      });
-
-      const totalPages = Math.ceil(totalJobs / limit);
-      const hasNextPage = page < totalPages;
-      const hasPrevPage = page > 1;
-
-      return {
-        success: true,
-        message: "Jobs retrieved successfully",
-        data: jobs,
-        totalPages,
-        currentPage: page,
-        totalCount: totalJobs
-      };
-    } catch (error) {
-      throw handleUseCaseError(error || "Unexpected error in GetAllJobsUseCase");
     }
   }
 }

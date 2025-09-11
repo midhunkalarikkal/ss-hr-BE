@@ -8,12 +8,12 @@ export class Job {
         public designation: string,
         public vacancy: number,
         public salary: number,
-        public benifits: string[],
-        public skills: string[],
+        public benifits: string,
+        public skills: string,
         public jobDescription: string,
         public nationality: string,
-        public createdAt: string,
-        public updatedAt: string,
+        public createdAt: Date,
+        public updatedAt: Date,
     ) { }
 }
 

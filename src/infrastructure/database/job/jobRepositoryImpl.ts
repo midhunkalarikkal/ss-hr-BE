@@ -1,10 +1,10 @@
-// src/infrastructure/database/job/jobRepositoryImpl.ts
-
-import { Types } from "mongoose";
 import { IJob, JobModel } from "./jobModel";
 import { Job } from "../../../domain/entities/job";
+import { UserFetchAllJobs, UserFetchJobDetailsResponse } from "../../dtos/userJob.dtos";
 import { ApiPaginationRequest, ApiResponse } from "../../dtos/common.dts";
-import { AdminFetchAllJobs, CreateJobProps, IJobRepository, GetAllJobsParams } from "../../../domain/repositories/IJobRepository";
+import { IJobRepository } from "../../../domain/repositories/IJobRepository";
+import { AdminCreateNewJob, AdminFetchAllJobs, AdminFetchJobDetailsResponse } from "../../dtos/adminJob.dtos";
+import { Types } from "mongoose";
 
 export class JobRepositoryImpl implements IJobRepository {
 
@@ -12,43 +12,52 @@ export class JobRepositoryImpl implements IJobRepository {
     return new Job(
       job._id,
       job.companyName,
+      job.industry,
       job.designation,
       job.vacancy,
-      job.createdAt.toISOString(),
-      job.updatedAt.toISOString(),
+      job.salary,
+      job.benifits,
+      job.skills,
+      job.jobDescription,
+      job.nationality,
+      job.createdAt,
+      job.updatedAt,
     );
   }
 
-  async createJob(job: CreateJobProps): Promise<Job> {
+  async createJob(payload: AdminCreateNewJob): Promise<Job | null> {
     try {
-      const createdJob = await JobModel.create(job);
-      return this.mapToEntity(createdJob);
+      const newJob = await JobModel.create(payload);
+      return newJob ? this.mapToEntity(newJob) : null;
     } catch (error) {
       throw new Error("Unable to create job, please try again.");
     }
   }
 
-  async findJobById(jobId: Types.ObjectId): Promise<Job | null> {
+  async findAllJobs({ page, limit }: ApiPaginationRequest, admin: boolean): Promise<ApiResponse<AdminFetchAllJobs | UserFetchAllJobs>> {
     try {
-      const job = await JobModel.findById(jobId);
-      return job ? this.mapToEntity(job) : null;
-    } catch (error) {
-      throw new Error("Job not found.");
-    }
-  }
+      const adminGetAllJobsProject = {
+        _id: 1, companyName: 1,
+        industry: 1,
+        vacancy: 1,
+        designation: 1,
+        salary: 1,
+        createdAt: 1
+      };
 
-  async findAllJobs({ page, limit }: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllJobs>> {
-    try {
+      const userGetAllJobsProject = {
+        _id: 1,
+        industry: 1,
+        vacancy: 1,
+        designation: 1,
+        salary: 1,
+        createdAt: 1
+      };
+
+      const project = admin ? adminGetAllJobsProject : userGetAllJobsProject;
       const skip = (page - 1) * limit;
       const [jobs, totalCount] = await Promise.all([
-        JobModel.find({}, {
-          _id: 1,
-          companyName: 1,
-          designation: 1,
-          vacancy: 1,
-          createdAt: 1,
-          updatedAt: 1
-        }).skip(skip).limit(limit).lean(),
+        JobModel.find({}, project).skip(skip).limit(limit).lean(),
         JobModel.countDocuments(),
       ]);
 
@@ -56,11 +65,12 @@ export class JobRepositoryImpl implements IJobRepository {
       return {
         data: jobs.map(job => ({
           _id: job._id,
-          companyName: job.companyName,
+          companyName: job.companyName || null,
+          industry: job.industry,
           designation: job.designation,
+          salary: job.salary,
           vacancy: job.vacancy,
-          createdAt: job.createdAt.toISOString(),
-          updatedAt: job.updatedAt.toISOString(),
+          createdAt: job.createdAt,
         })),
         totalPages,
         currentPage: page,
@@ -71,37 +81,47 @@ export class JobRepositoryImpl implements IJobRepository {
     }
   }
 
-  async getAllJobs(params: GetAllJobsParams): Promise<Job[]> {
+
+  async findJobById(jobId: Types.ObjectId, admin: boolean): Promise<AdminFetchJobDetailsResponse | UserFetchJobDetailsResponse | null> {
     try {
-      const sortOrder = params.sortOrder === 'desc' ? -1 : 1;
-      const sortObj: { [key: string]: 1 | -1 } = { [params.sortBy]: sortOrder };
+      const adminGetAllJobsProject = {
+        _id: 1,
+        companyName: 1,
+        industry: 1,
+        designation: 1,
+        vacancy: 1,
+        salary: 1,
+        benifits: 1,
+        skills: 1,
+        jobDescription: 1,
+        nationality: 1,
+        createdAt: 1
+      };
 
-      const jobs = await JobModel.find({})
-        .sort(sortObj)
-        .skip(params.skip)
-        .limit(params.limit);
-
-      return jobs.map(job => this.mapToEntity(job));
+      const userGetAllJobsProject = {
+        _id: 1,
+        industry: 1,
+        designation: 1,
+        vacancy: 1,
+        salary: 1,
+        benifits: 1,
+        skills: 1,
+        jobDescription: 1,
+        nationality: 1,
+        createdAt: 1
+      };
+      const project = admin ? adminGetAllJobsProject : userGetAllJobsProject;
+      const job = await JobModel.findById(jobId, project);
+      return job ? this.mapToEntity(job) : null;
     } catch (error) {
-      throw new Error("Failed to fetch jobs from database.");
+      throw new Error("Job not found.");
     }
   }
 
-  async getTotalCount(): Promise<number> {
-    try {
-      return await JobModel.countDocuments({});
-    } catch (error) {
-      throw new Error("Failed to get total job count.");
-    }
-  }
 
-  async updateJob(job: Job): Promise<Job | null> {
+  async updateJob(jobId: Types.ObjectId, updatedData: AdminCreateNewJob): Promise<Job | null> {
     try {
-      const updatedJob = await JobModel.findByIdAndUpdate(job._id, {
-        companyName: job.companyName,
-        designation: job.designation,
-        vacancy: job.vacancy,
-      }, { new: true });
+      const updatedJob = await JobModel.findByIdAndUpdate({ _id: jobId }, updatedData, { new: true });
       return updatedJob ? this.mapToEntity(updatedJob) : null;
     } catch (error) {
       throw new Error("Unable to update job.");
@@ -117,12 +137,20 @@ export class JobRepositoryImpl implements IJobRepository {
     }
   }
 
-  async findJobsByCompanyName(companyName: string): Promise<Job[]> {
-    try {
-      const jobs = await JobModel.find({ companyName });
-      return jobs.map(job => this.mapToEntity(job));
-    } catch (error) {
-      throw new Error("Unable to find jobs by company name.");
-    }
-  }
+  // async getTotalCount(): Promise<number> {
+  //   try {
+  //     return await JobModel.countDocuments({});
+  //   } catch (error) {
+  //     throw new Error("Failed to get total job count.");
+  //   }
+  // }
+
+  // async findJobsByCompanyName(companyName: string): Promise<Job[]> {
+  //   try {
+  //     const jobs = await JobModel.find({ companyName });
+  //     return jobs.map(job => this.mapToEntity(job));
+  //   } catch (error) {
+  //     throw new Error("Unable to find jobs by company name.");
+  //   }
+  // }
 }

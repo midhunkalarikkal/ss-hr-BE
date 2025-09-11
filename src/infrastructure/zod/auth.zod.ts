@@ -15,7 +15,7 @@ export const passwordField = z.string()
     "Invalid password"
   );
 
-export const roleField = z.enum(["user", "admin", "superAdmin"] as const);
+export const roleField = z.enum(["user", "admin", "superAdmin", "systemAdmin"] as const);
 
 export const limitedRoleField = z.enum(["user", "admin", "superAdmin"]);
 

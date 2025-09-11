@@ -1,38 +1,22 @@
-// src/domain/repositories/IJobRepository.ts
 
 import { Types } from "mongoose";
 import { Job } from "../entities/job";
+import { UserFetchAllJobs, UserFetchJobDetailsResponse } from "../../infrastructure/dtos/userJob.dtos";
 import { ApiPaginationRequest, ApiResponse } from "../../infrastructure/dtos/common.dts";
-
-export type CreateJobProps = {
-  companyName: string;
-  designation: string;
-  vacancy: number;
-};
-
-export type AdminFetchAllJobs = Array<Pick<Job, "_id" | "companyName" | "designation" | "vacancy" | "createdAt" | "updatedAt">>;
-
-export interface GetAllJobsParams {
-  skip: number;
-  limit: number;
-  sortBy: string;
-  sortOrder: 'asc' | 'desc';
-}
+import { AdminCreateNewJob, AdminFetchAllJobs, AdminFetchJobDetailsResponse } from "../../infrastructure/dtos/adminJob.dtos";
 
 export interface IJobRepository {
-  createJob(job: CreateJobProps): Promise<Job>;
+  createJob(payload: AdminCreateNewJob): Promise<Job | null>;
+
+  findAllJobs({page,limit}: ApiPaginationRequest, admin: boolean): Promise<ApiResponse<AdminFetchAllJobs | UserFetchAllJobs>>;
   
-  findJobById(jobId: Types.ObjectId): Promise<Job | null>;
+  findJobById(jobId: Types.ObjectId, admin: boolean): Promise<AdminFetchJobDetailsResponse | UserFetchJobDetailsResponse | null>;
   
-  findAllJobs({page,limit}: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllJobs>>;
-  
-  getAllJobs(params: GetAllJobsParams): Promise<Job[]>;
-  
-  getTotalCount(): Promise<number>;
-  
-  updateJob(job: Job): Promise<Job | null>;
+  updateJob(jobId: Types.ObjectId, updatedData: AdminCreateNewJob): Promise<Job | null>;
   
   deleteJob(jobId: Types.ObjectId): Promise<boolean>;
+
+  // getTotalCount(): Promise<number>;
   
-  findJobsByCompanyName(companyName: string): Promise<Job[]>;
+  // findJobsByCompanyName(companyName: string): Promise<Job[]>;
 }
