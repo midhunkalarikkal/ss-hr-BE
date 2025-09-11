@@ -178,4 +178,17 @@ export const RequestQueryCommonZodSchema = z.object({
 });
 
 
-// Validating the files
+// ObjectId validation
+export const ValidateObjectId = (id: string, name: string) => {
+  const schema = z.object({
+    id: objectIdField(name),
+  });
+  return schema.parse({ id });
+}
+
+
+// Pagination req.query validation
+export const paginationReqQuery = z.object({
+  page: z.string().optional().transform((val) => val ? parseInt(val, 10) : 1),
+  limit: z.string().optional().transform((val) => val ? parseInt(val, 10) : 10),
+});

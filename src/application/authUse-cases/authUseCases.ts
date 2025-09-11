@@ -127,6 +127,7 @@ export class LoginUseCase {
 
   async execute(data: LoginRequest): Promise<LoginResponse> {
     try {
+      console.log("data : ",data);
       const { email, password, role } = data;
       if (!email || !password || !role) throw new Error("Invalid request.");
 
@@ -136,9 +137,9 @@ export class LoginUseCase {
 
       let user: User | null = null;
 
-      if (role === "user" || role === "admin") { // TODO need to ahandle admin
+      if (role === "user" || role === "admin" || role === "superAdmin") { // TODO need to ahandle admin
         user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
-      } else if (role === "superAdmin") {
+      } else if (role === "systemAdmin") {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
           throw new Error("Invalid credentials.");
         }
