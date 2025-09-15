@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
-import { adminController } from '../controllers/adminController';
+import { adminUserController } from '../controllers/adminUserController';
 
 const router = Router();
 
-router.get('/users', authMiddleware, adminController.getAllUsersForChatSidebar);
+router.get('/users', authMiddleware, adminUserController.getAllUsersForChatSidebar);
 
 export default router;
