@@ -11,6 +11,8 @@ import { CreateAdminUseCase } from "../../application/adminUse-cases/adminSettin
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 import { GetAllUsersForChatSideBarUseCase } from "../../application/adminUse-cases/adminGetAllUsersForChatSidebarUseCase";
+import { AdminGetAllAdminsUseCase } from "../../application/use-cases/adminGetAllAdminsUseCase";
+import { paginationReqQuery } from "../../infrastructure/zod/common.zod";
 
 const s3Clien = new S3Client();
 const randomStringGenerator = new RandomStringGenerator()
@@ -23,14 +25,17 @@ const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName,signedUrlRepositoryImpl);
 const getAllUsersForChatSideBarUseCase = new GetAllUsersForChatSideBarUseCase(userRepositoryImpl, signedUrlService);
+const adminGetAllAdminsUseCase = new AdminGetAllAdminsUseCase(userRepositoryImpl);
 
-export class AdminController {
+export class AdminUserController {
     constructor(
         private createAdminUseCase: CreateAdminUseCase,
-        private getAllUsersForChatSideBarUseCase: GetAllUsersForChatSideBarUseCase
+        private getAllUsersForChatSideBarUseCase: GetAllUsersForChatSideBarUseCase,
+        private adminGetAllAdminsUseCase: AdminGetAllAdminsUseCase,
     ) {
         this.createNewAdmin = this.createNewAdmin.bind(this);
         this.getAllUsersForChatSidebar = this.getAllUsersForChatSidebar.bind(this);
+        this.getAllAdmins = this.getAllAdmins.bind(this);
     }
 
     async createNewAdmin(req: Request, res: Response) {
@@ -53,7 +58,18 @@ export class AdminController {
             HandleError.handle(error, res);
         }
     }
+    
+    async getAllAdmins(req: Request, res: Response) {
+        try {
+            const validatedData = paginationReqQuery.parse(req.query);
+            const result = await this.adminGetAllAdminsUseCase.execute(validatedData);
+            return res.status(200).json(result);
+        } catch (error) {
+            console.log("getAllAdmins error : ", error);
+            HandleError.handle(error, res);
+        }
+    }
 }
 
-const adminController = new AdminController(createAdminUseCase, getAllUsersForChatSideBarUseCase);
-export { adminController };
+const adminUserController = new AdminUserController(createAdminUseCase, getAllUsersForChatSideBarUseCase, adminGetAllAdminsUseCase);
+export { adminUserController };

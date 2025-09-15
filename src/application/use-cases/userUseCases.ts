@@ -23,7 +23,7 @@ export class CreateUserByAdminUseCase {
       const hashedPassword = await PasswordHasher.hashPassword(password);
       
       const serialNumber = await this.userRepository.generateNextSerialNumber();
-
+      
       const createdUser = await this.userRepository.createUser({
         fullName,
         email,
@@ -33,7 +33,6 @@ export class CreateUserByAdminUseCase {
         phone: phone || "",
         phoneTwo: phoneTwo || "",
         isVerified: true,
-        verificationToken: "",
         profileImage: "",
       });
 

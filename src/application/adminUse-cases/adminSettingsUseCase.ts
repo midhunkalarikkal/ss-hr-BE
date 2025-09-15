@@ -5,6 +5,7 @@ import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
 import { validateFile } from "../../infrastructure/validator/imageFileValidator";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { CreateAdminRequest, CreateAdminResponse } from "../../infrastructure/dtos/admin.dtos";
+import { CreateAdmin } from "../../domain/repositories/IUserRepository";
 
 export class CreateAdminUseCase {
     constructor(
@@ -28,11 +29,14 @@ export class CreateAdminUseCase {
                 });
             }
 
+            const serialNumber: string = await this.userRepositoryImpl.generateNextSerialNumber();
+
             password = await PasswordHasher.hashPassword(password);
             const adminData = { fullName, email, password, phone, role }
 
-            const createdAdmin = await this.userRepositoryImpl.createUser({
+            const createdAdmin = await this.userRepositoryImpl.createUser<CreateAdmin>({
                 ...adminData,
+                serialNumber,
                 profileImage: profileImageUrl,
                 isVerified: true,
             });

@@ -10,6 +10,7 @@ import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
 import { SignedUrlService } from '../../infrastructure/service/generateSignedUrl';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
+import { CreateLocalUser } from '../../domain/repositories/IUserRepository';
 
 export class RegisterUseCase {
   constructor(
@@ -28,6 +29,8 @@ export class RegisterUseCase {
       const verificationToken = uuidv4();
       if (!verificationToken) throw new Error("Unexpected error, please try again.");
 
+      const serialNumber: string = await this.userRepositoryImpl.generateNextSerialNumber();
+
       const otp = await OTPService.setOtp(verificationToken);
       if (!otp) throw new Error("Unexpected error, please try again.");
 
@@ -38,12 +41,13 @@ export class RegisterUseCase {
         existingUser.password = hashedPassword;
         await this.userRepositoryImpl.updateUser(existingUser as User);
       } else {
-        await this.userRepositoryImpl.createUser({
+        await this.userRepositoryImpl.createUser<CreateLocalUser>({
           fullName: fullName,
           email: email,
           password: hashedPassword,
           verificationToken: verificationToken,
-          role: role
+          role: role,
+          serialNumber: serialNumber
         });
       }
 
