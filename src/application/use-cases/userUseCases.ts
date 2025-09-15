@@ -5,6 +5,7 @@ import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import {CreateUserByAdminRequest,CreateUserByAdminResponse,UpdateUserRequest,UpdateUserResponse,DeleteUserRequest,GetUserByIdRequest,GetUserByIdResponse} from "../../infrastructure/dtos/user.dto";
+import { CreateLocalUserByAdmin } from "../../domain/repositories/IUserRepository";
 
 export class CreateUserByAdminUseCase {
   constructor(
@@ -24,7 +25,7 @@ export class CreateUserByAdminUseCase {
       
       const serialNumber = await this.userRepository.generateNextSerialNumber();
       
-      const createdUser = await this.userRepository.createUser({
+      const createdUser = await this.userRepository.createUser<CreateLocalUserByAdmin>({
         fullName,
         email,
         serialNumber,

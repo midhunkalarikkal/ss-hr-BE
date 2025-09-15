@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { IUser, UserModel } from "./userModel";
 import { Role, User } from "../../../domain/entities/user";
 import {ApiPaginationRequest,ApiResponse,FetchUsersForChatSideBar} from "../../dtos/common.dts";
-import { AdminFetchAllAdmins, AdminFetchAllUsers,CreateUserProps,IUserRepository} from "../../../domain/repositories/IUserRepository";
+import { AdminFetchAllAdmins, AdminFetchAllUsers, IUserRepository} from "../../../domain/repositories/IUserRepository";
 
 export class UserRepositoryImpl implements IUserRepository {
   private mapToEntity(user: IUser): User {

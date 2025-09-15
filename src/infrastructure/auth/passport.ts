@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Types } from 'mongoose';
 import { googleClientConfig, appConfig } from '../../config/env';
 import { UserRepositoryImpl } from '../database/user/userRepositoryImpl';
+import { CreateGoogleUser } from '../../domain/repositories/IUserRepository';
 
 const userRepository = new UserRepositoryImpl();
 
@@ -30,7 +31,7 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
         return done(null, emailUser);
       }
 
-      const newUser = await userRepository.createUser({
+      const newUser = await userRepository.createUser<CreateGoogleUser>({
         googleId: profile.id,
         fullName: profile.displayName || '',
         email: profile.emails?.[0]?.value || '',
