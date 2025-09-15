@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { Role, User } from "../entities/user";
 import {ApiPaginationRequest,ApiResponse, FetchUsersForChatSideBar} from "../../infrastructure/dtos/common.dts";
 
-export type CreateLocalUser = Pick<User,"fullName" | "email" | "password" | "verificationToken" | "role">;
+export type CreateLocalUser = Pick<User,"fullName" | "email" | "password" | "verificationToken" | "role" | "serialNumber">;
 export type CreateGoogleUser = Pick<User,"fullName" | "email" | "password" | "isVerified" | "verificationToken" | "role" | "phone" | "phoneTwo" | "profileImage" | "googleId">;
 export type CreateAdmin = Pick<User,"fullName" | "email" | "password" | "isVerified" | "role" | "phone" | "profileImage">;
 export type AdminFetchAllUsers = Array<Pick<User, "_id" | "serialNumber" | "fullName" | "email" | "isBlocked" | "isVerified" |"createdAt">>;

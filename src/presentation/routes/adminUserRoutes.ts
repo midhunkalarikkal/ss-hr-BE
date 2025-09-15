@@ -1,6 +1,6 @@
 import {Router} from "express"
-import { userController } from '../controllers/userController';
 import { authMiddleware } from '../middleware/authMiddleware';
+import { userController } from '../controllers/userController';
 
 const router = Router();
 
@@ -13,4 +13,4 @@ router.get('/:id', authMiddleware, userController.getUserById);
 router.put('/:id', authMiddleware, userController.updateUser);
 router.delete('/:id', authMiddleware, userController.deleteUser);
 
-export { router as adminUsersRoutes };
+export default router;

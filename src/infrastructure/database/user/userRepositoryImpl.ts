@@ -27,30 +27,28 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async generateNextSerialNumber(): Promise<string> {
     try {
-      const lastUser = await UserModel.findOne({}, { serialNumber: 1 })
-        .sort({ serialNumber: -1 })
-        .lean();
+    const lastUser = await UserModel.findOne({}, { serialNumber: 1 })
+      .sort({ serialNumber: -1 })
+      .lean();
 
-      if (!lastUser) {
-        return "U001";
-      }
-
-      const lastNumber = parseInt(lastUser.serialNumber.substring(1));
-
-      const nextNumber = lastNumber + 1;
-      const newSerialNumber = `U${nextNumber.toString().padStart(3, "0")}`;
-
-      return newSerialNumber;
-    } catch (error) {
-      throw new Error("Failed to generate serial number");
+    if (!lastUser || !lastUser.serialNumber) {
+      return "U001";
     }
+
+    const lastNumber = parseInt(lastUser.serialNumber.substring(1), 10);
+    const nextNumber = lastNumber + 1;
+
+    const newSerialNumber = `U${nextNumber.toString().padStart(3, "0")}`;
+    return newSerialNumber;
+  } catch (error) {
+    console.log("error : ", error);
+    throw new Error("Failed to generate serial number");
+  }
   }
 
   async createUser(user: CreateUserProps): Promise<User> {
     try {
-      const serialNumber = await this.generateNextSerialNumber();
-
-      const createdUser = await UserModel.create({ ...user, serialNumber });
+      const createdUser = await UserModel.create({ ...user });
 
       return this.mapToEntity(createdUser);
     } catch (error) {
@@ -98,7 +96,7 @@ export class UserRepositoryImpl implements IUserRepository {
       const skip = (page - 1) * limit;
       const [users, totalCount] = await Promise.all([
         UserModel.find(
-          {},
+          { role:  "user"},
           {
             _id: 1,
             serialNumber: 1,

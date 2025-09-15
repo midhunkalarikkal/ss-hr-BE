@@ -11,11 +11,11 @@ import authRoutes from './presentation/routes/authRoutes';
 import messageRoutes from './presentation/routes/messageRoutes';
 import adminJobRoutes from './presentation/routes/adminJobRoutes';
 import adminChatRoutes from './presentation/routes/adminChatRoutes';
+import adminUsersRoutes from './presentation/routes/adminUserRoutes';
+import adminPaymentRoutes from "./presentation/routes/adminPaymentRoutes";
+import adminPackageRoutes from "./presentation/routes/adminPackageRoutes";
 import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
-import { adminUsersRoutes } from './presentation/routes/userRoutes';
-import { adminTestimonialRoutes } from './presentation/routes/testimonialRoutes';
-import {adminPackageRoutes} from "./presentation/routes/packageRoutes";
-import {adminPaymentRoutes} from "./presentation/routes/paymentRoutes"
+import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes';
 
 import userChatRoutes from './presentation/routes/userChatRoutes';
 

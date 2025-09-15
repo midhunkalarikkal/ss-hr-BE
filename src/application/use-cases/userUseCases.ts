@@ -7,7 +7,9 @@ import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepos
 import {CreateUserByAdminRequest,CreateUserByAdminResponse,UpdateUserRequest,UpdateUserResponse,DeleteUserRequest,GetUserByIdRequest,GetUserByIdResponse} from "../../infrastructure/dtos/user.dto";
 
 export class CreateUserByAdminUseCase {
-  constructor(private userRepository: UserRepositoryImpl) {}
+  constructor(
+    private userRepository: UserRepositoryImpl,
+  ) {}
 
   async execute(
     data: CreateUserByAdminRequest
@@ -19,10 +21,13 @@ export class CreateUserByAdminUseCase {
       if (existingUser) throw new Error("User already exists with this email");
 
       const hashedPassword = await PasswordHasher.hashPassword(password);
+      
+      const serialNumber = await this.userRepository.generateNextSerialNumber();
 
       const createdUser = await this.userRepository.createUser({
         fullName,
         email,
+        serialNumber,
         password: hashedPassword,
         role,
         phone: phone || "",
