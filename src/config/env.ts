@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const mongoConfig = {
-    mongoURL : process.env.MONGODB_URI 
+    mongoURL : process.env.NODE_ENV === "development" ? process.env.MONGODB_LOCAL_URI : process.env. MONGODB_PRODUCTION_URI,
 }
 
 export const mailConfig = {
@@ -18,7 +18,7 @@ export const jwtConfig = {
 export const appConfig = {
     port: process.env.PORT,
     nodeEnv : process.env.NODE_ENV,
-    frontendUrl: process.env.NODE_ENV === "development" ? process.env.FRONTEND_URL : process.env.FRONTEND_PRODUCTION_URL 
+    frontendUrl: process.env.NODE_ENV === "development" ? process.env.FRONTEND_BASE_URL : process.env.FRONTEND_PRODUCTION_URL 
 }
 
 export const adminConfig = {

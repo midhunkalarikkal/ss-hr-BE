@@ -1,12 +1,11 @@
 import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Types } from 'mongoose';
-import { googleClientConfig, appConfig } from '../../config/env';
+import { appConfig, googleClientConfig, } from '../../config/env';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { UserRepositoryImpl } from '../database/user/userRepositoryImpl';
 import { CreateGoogleUser } from '../../domain/repositories/IUserRepository';
 
 const userRepository = new UserRepositoryImpl();
-
 
 if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret) {
   console.warn('Google OAuth credentials not found. Google SSO will be disabled.');
@@ -14,7 +13,7 @@ if (!googleClientConfig.googleClientId || !googleClientConfig.googleClientSecret
   passport.use(new GoogleStrategy({
     clientID: googleClientConfig.googleClientId,
     clientSecret: googleClientConfig.googleClientSecret,
-    callbackURL: `${process.env.NODE_ENV === 'development' ? process.env.GOOGLE_CALLBACK_LOCAL_URL : process.env.GOOGLE_CALLBACK_PRODUCTION_URL}`,
+    callbackURL: `${appConfig.nodeEnv === 'development' ? process.env.GOOGLE_CALLBACK_LOCAL_URL : process.env.GOOGLE_CALLBACK_PRODUCTION_URL}`,
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       const existingUser = await userRepository.findUserByGoogleId(profile.id);
