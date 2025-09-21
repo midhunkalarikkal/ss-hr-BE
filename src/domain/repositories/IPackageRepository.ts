@@ -3,8 +3,8 @@ import { Package } from "../entities/package"
 import {ApiPaginationRequest,ApiResponse} from "../../infrastructure/dtos/common.dts"
 
 
-export type CreatePackage = Pick<Package,"packageName" | "description" | "priceIN" | "priceUAE" | "packageType" | "packageDuration" | "image" | "features" | "food" | "accommodation" | "travelCard" | "utilityBills" | "airportPickup" | "jobGuidance"> 
-export type AdminFetchAllPackages = Array<Pick<Package,"_id"|"packageName"|"description"|"priceIN"|"priceUAE"|"packageType"|"packageDuration"|"image"|"features"|"food"|"accommodation"|"travelCard"|"utilityBills"|"airportPickup"|"jobGuidance"|"createdAt"|"updatedAt">>
+export type CreatePackage = Pick<Package,"packageName" | "description" | "priceIN" | "priceUAE" | "packageType" | "packageDuration" | "features" | "food" | "accommodation" | "travelCard" | "utilityBills" | "airportPickup" | "jobGuidance"> 
+export type AdminFetchAllPackages = Array<Pick<Package,"_id"|"packageName"|"description"|"priceIN"|"priceUAE"|"packageType"|"packageDuration"|"features"|"food"|"accommodation"|"travelCard"|"utilityBills"|"airportPickup"|"jobGuidance"|"createdAt"|"updatedAt">>
 
 export interface IPackageRepository {
 

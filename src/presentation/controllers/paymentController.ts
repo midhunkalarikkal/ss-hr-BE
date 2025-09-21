@@ -12,7 +12,7 @@ import {
   GetPaymentsByPackageUseCase,
   GetPaymentsByStatusUseCase,
   GetPaymentStatsUseCase
-} from '../../application/use-cases/paymentUseCases';
+} from '../../application/adminUse-cases/adminPaymentUseCases';
 
 const paymentRepositoryImpl = new PaymentRepositoryImpl();
 const createPaymentUseCase = new CreatePaymentUseCase(paymentRepositoryImpl);

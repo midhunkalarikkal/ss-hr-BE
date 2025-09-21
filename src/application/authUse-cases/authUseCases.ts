@@ -135,10 +135,6 @@ export class LoginUseCase {
       const { email, password, role } = data;
       if (!email || !password || !role) throw new Error("Invalid request.");
 
-      // validateOrThrow("email", email);
-      // validateOrThrow("password", password);
-      // validateOrThrow("role", role);
-
       let user: User | null = null;
 
       if (role === "user" || role === "admin" || role === "superAdmin") { // TODO need to ahandle admin
@@ -167,15 +163,7 @@ export class LoginUseCase {
       let updateProfileImage;
 
       if (user.profileImage) {
-        const userOrProviderProfileUrl = user.profileImage;
-        if (!userOrProviderProfileUrl) throw new Error("Profile image fetching error.");
-        const urlParts = userOrProviderProfileUrl?.split('/');
-        if (!urlParts) throw new Error("UrlParts error.");
-        const s3Key = urlParts.slice(3).join('/');
-        if (!s3Key) throw new Error("Image retrieving.");
-        const signedUrl = await this.signedUrlService.generateSignedUrl(s3Key);
-        if (!signedUrl) throw new Error("Image fetching error.");
-        updateProfileImage = signedUrl
+        updateProfileImage = await this.signedUrlService.generateSignedUrl(user.profileImage);
       }
 
       return {
@@ -188,6 +176,7 @@ export class LoginUseCase {
         }
       };
     } catch (error) {
+      console.log("LoginUseCase error : ",error);
       throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
     }
   }

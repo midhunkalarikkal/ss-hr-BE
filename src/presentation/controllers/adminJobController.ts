@@ -4,7 +4,7 @@ import { HandleError } from "../../infrastructure/error/error";
 import { CreateJobZodSchema} from "../../infrastructure/zod/job.zod";
 import { JobRepositoryImpl } from "../../infrastructure/database/job/jobRepositoryImpl";
 import { paginationReqQuery, ValidateObjectId } from "../../infrastructure/zod/common.zod";
-import {CreateJobUseCase, DeleteJobUseCase, GetAllJobsUseCase, GetJobByIdUseCase, UpdateJobUseCase} from "../../application/use-cases/jobUseCases";
+import {CreateJobUseCase, DeleteJobUseCase, GetAllJobsUseCase, GetJobByIdUseCase, UpdateJobUseCase} from "../../application/adminUse-cases/adminJobUseCases";
 
 const jobRepositoryImpl = new JobRepositoryImpl();
 const createJobUseCase = new CreateJobUseCase(jobRepositoryImpl);

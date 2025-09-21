@@ -9,6 +9,7 @@ import { appConfig } from './config/env';
 import passport from './infrastructure/auth/passport';
 import authRoutes from './presentation/routes/authRoutes';
 import messageRoutes from './presentation/routes/messageRoutes';
+import userRoutes from './presentation/routes/userRoutes';
 import adminJobRoutes from './presentation/routes/adminJobRoutes';
 import adminChatRoutes from './presentation/routes/adminChatRoutes';
 import adminUsersRoutes from './presentation/routes/adminUserRoutes';
@@ -16,8 +17,6 @@ import adminPaymentRoutes from "./presentation/routes/adminPaymentRoutes";
 import adminPackageRoutes from "./presentation/routes/adminPackageRoutes";
 import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
 import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes';
-
-import userChatRoutes from './presentation/routes/userChatRoutes';
 
 
 const app = express();
@@ -63,6 +62,7 @@ app.use(passport.initialize());
 
 
 app.use('/api/auth',authRoutes);
+
 app.use("/api/admin/settings",adminSettingsRoutes);
 app.use('/api/admin/jobs',adminJobRoutes);
 app.use('/api/admin/chat',adminChatRoutes);
@@ -70,7 +70,9 @@ app.use('/api/admin/users',adminUsersRoutes);
 app.use("/api/admin/testimonials",adminTestimonialRoutes);
 app.use('/api/admin/packages', adminPackageRoutes);
 app.use('/api/admin/payments', adminPaymentRoutes);
-app.use('/api/user/chat',userChatRoutes);
+
 app.use('/api/message',messageRoutes);
+
+app.use('/api/user',userRoutes);
 
 export default app;
