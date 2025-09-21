@@ -165,10 +165,7 @@ export class AuthController {
   async googleCallback(req: Request, res: Response) {
     try {
       if (!req.user) {
-        const frontendUrl =
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : "https://ss-hr-fe.vercel.app";
+        const frontendUrl = appConfig.frontendUrl;
         return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
       }
 
@@ -181,17 +178,11 @@ export class AuthController {
         secure: appConfig.nodeEnv !== "development",
       });
 
-      const frontendUrl =
-        process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : "https://ss-hr-c-fe-fucg.vercel.app";
+      const frontendUrl = appConfig.frontendUrl;
       res.redirect(`${frontendUrl}/`);
     } catch (error) {
       console.log("Google auth error:", error);
-      const frontendUrl =
-        process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : "https://ss-hr-vercel.vercel.app";
+      const frontendUrl = appConfig.frontendUrl;
       res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
   }
