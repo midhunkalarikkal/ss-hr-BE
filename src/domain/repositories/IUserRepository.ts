@@ -34,4 +34,6 @@ export interface IUserRepository {
   generateNextSerialNumber():Promise<string>;
 
   getTotalCount():Promise<number>;
+
+  deleteUserById(id: Types.ObjectId): Promise<boolean>;
 }

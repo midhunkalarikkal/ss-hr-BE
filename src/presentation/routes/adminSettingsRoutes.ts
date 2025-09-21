@@ -7,8 +7,8 @@ const router = Router();
 
 router.post('/admins', authMiddleware, upload.single('profileImage'), adminSettingsController.createNewAdmin);
 router.get('/admins', authMiddleware, adminSettingsController.getAllAdmins);
+router.delete('/:id', authMiddleware, adminSettingsController.deleteAdmin);
 
 // router.patch('/admins/:id', authMiddleware, adminController); update a single admin including blocking
-// router.delete('/admins/:id', authMiddleware, adminController); delete a specific admin
 
 export default router;

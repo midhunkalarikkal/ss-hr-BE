@@ -5,32 +5,37 @@ import { HandleError } from "../../infrastructure/error/error";
 import { paginationReqQuery } from "../../infrastructure/zod/common.zod";
 import { CreateAdminZodSchema } from "../../infrastructure/zod/admin.zod";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
-import { FileUploadService } from "../../infrastructure/service/fileUpload";
+import { FileDeleteService, FileUploadService } from "../../infrastructure/service/fileUpload";
 import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
-import { CreateAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCase";
+import { CreateAdminUseCase, DeleteAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCase";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { AdminGetAllAdminsUseCase } from "../../application/adminUse-cases/adminGetAllAdminsUseCase";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
+import { Types } from "mongoose";
 
 const s3Client = new S3Client();
 const randomStringGenerator = new RandomStringGenerator()
 const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
+const fileDeleteService = new FileDeleteService(s3Client);
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const fileUploadService = new FileUploadService(s3Client, s3KeyGenerator);
 const adminGetAllAdminsUseCase = new AdminGetAllAdminsUseCase(userRepositoryImpl);
 const createAdminUseCase = new CreateAdminUseCase(userRepositoryImpl, fileUploadService, signedUrlService);
+const deleteAdminUseCase = new DeleteAdminUseCase(userRepositoryImpl, fileDeleteService);
 
 export class AdminSettingsController {
     constructor(
         private createAdminUseCase: CreateAdminUseCase,
         private adminGetAllAdminsUseCase: AdminGetAllAdminsUseCase,
+        private deleteAdminUseCase: DeleteAdminUseCase,
     ) {
         this.createNewAdmin = this.createNewAdmin.bind(this);
         this.getAllAdmins = this.getAllAdmins.bind(this);
+        this.deleteAdmin = this.deleteAdmin.bind(this);
     }
 
     async createNewAdmin(req: Request, res: Response) {
@@ -55,7 +60,23 @@ export class AdminSettingsController {
         }
     }
 
+    async deleteAdmin(req: Request, res: Response) {
+        try {
+            console.log("Admin deleting")
+            const { id: adminId } = req.params;
+            const result = await this.deleteAdminUseCase.execute(new Types.ObjectId(adminId));
+            res.status(200).json(result);
+        } catch (error) {
+            console.log("deleteAdmin error : ", error);
+            HandleError.handle(error, res);
+        }
+    }
+
 }
 
-const adminSettingsController = new AdminSettingsController(createAdminUseCase, adminGetAllAdminsUseCase);
+const adminSettingsController = new AdminSettingsController(
+    createAdminUseCase, 
+    adminGetAllAdminsUseCase, 
+    deleteAdminUseCase
+);
 export { adminSettingsController };
