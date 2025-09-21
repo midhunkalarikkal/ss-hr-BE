@@ -9,6 +9,4 @@ router.post('/admins', authMiddleware, upload.single('profileImage'), adminSetti
 router.get('/admins', authMiddleware, adminSettingsController.getAllAdmins);
 router.delete('/:id', authMiddleware, adminSettingsController.deleteAdmin);
 
-// router.patch('/admins/:id', authMiddleware, adminController); update a single admin including blocking
-
 export default router;
