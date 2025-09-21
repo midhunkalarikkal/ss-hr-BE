@@ -6,21 +6,21 @@ import { paginationReqQuery } from "../../infrastructure/zod/common.zod";
 import { CreateAdminZodSchema } from "../../infrastructure/zod/admin.zod";
 import { S3KeyGenerator } from "../../infrastructure/helper/generateS3key";
 import { FileUploadService } from "../../infrastructure/service/fileUpload";
+import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { RandomStringGenerator } from "../../infrastructure/helper/generateRandomString";
 import { CreateAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCase";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { AdminGetAllAdminsUseCase } from "../../application/adminUse-cases/adminGetAllAdminsUseCase";
-import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 
-const s3Clien = new S3Client();
+const s3Client = new S3Client();
 const randomStringGenerator = new RandomStringGenerator()
 const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
 
 const userRepositoryImpl = new UserRepositoryImpl();
-const fileUploadService = new FileUploadService(s3Clien, s3KeyGenerator);
+const fileUploadService = new FileUploadService(s3Client, s3KeyGenerator);
 const adminGetAllAdminsUseCase = new AdminGetAllAdminsUseCase(userRepositoryImpl);
 const createAdminUseCase = new CreateAdminUseCase(userRepositoryImpl, fileUploadService, signedUrlService);
 

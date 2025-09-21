@@ -18,7 +18,7 @@ export class FileUploadService {
   async uploadFile({ folder, userId, file }: UploadFileOptions): Promise<string> {
     
     try {
-
+      console.log("Uploading image")
       
       const s3Key = await this.s3KeyGenerator.generateS3Key({
         folder,
@@ -55,6 +55,7 @@ export class FileDeleteService {
 
   async deleteFile(s3Key: string): Promise<boolean> {
     try {
+      console.log("Deleting image");
       const command = new DeleteObjectCommand({
         Bucket: aws_s3Config.bucketName as string,
         Key: s3Key,
