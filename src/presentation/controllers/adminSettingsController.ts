@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { S3Client } from "@aws-sdk/client-s3";
+import { aws_s3Config } from "../../config/env";
 import { HandleError } from "../../infrastructure/error/error";
 import { paginationReqQuery } from "../../infrastructure/zod/common.zod";
 import { CreateAdminZodSchema } from "../../infrastructure/zod/admin.zod";
@@ -9,15 +10,19 @@ import { RandomStringGenerator } from "../../infrastructure/helper/generateRando
 import { CreateAdminUseCase } from "../../application/adminUse-cases/adminSettingsUseCase";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { AdminGetAllAdminsUseCase } from "../../application/adminUse-cases/adminGetAllAdminsUseCase";
+import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl/signedUrlRepositoryImpl";
 
 const s3Clien = new S3Client();
 const randomStringGenerator = new RandomStringGenerator()
 const s3KeyGenerator = new S3KeyGenerator(randomStringGenerator);
+const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
+const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);
 
 const userRepositoryImpl = new UserRepositoryImpl();
 const fileUploadService = new FileUploadService(s3Clien, s3KeyGenerator);
 const adminGetAllAdminsUseCase = new AdminGetAllAdminsUseCase(userRepositoryImpl);
-const createAdminUseCase = new CreateAdminUseCase(userRepositoryImpl, fileUploadService);
+const createAdminUseCase = new CreateAdminUseCase(userRepositoryImpl, fileUploadService, signedUrlService);
 
 export class AdminSettingsController {
     constructor(
