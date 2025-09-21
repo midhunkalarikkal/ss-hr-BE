@@ -10,6 +10,7 @@ import { PasswordHasher } from '../../infrastructure/security/passwordHasher';
 import { SignedUrlService } from '../../infrastructure/service/generateSignedUrl';
 import { UserRepositoryImpl } from '../../infrastructure/database/user/userRepositoryImpl';
 import { CheckUserStatusRequest, CheckUserStatusResponse, LoginRequest, LoginResponse, OTPVerificationRequest, RegisterRequest, RegisterResponse, ResendOtpRequest, ResendOtpResponse } from '../../infrastructure/dtos/auth.dto';
+import { CreateLocalUser } from '../../domain/repositories/IUserRepository';
 
 export class RegisterUseCase {
   constructor(
@@ -28,6 +29,8 @@ export class RegisterUseCase {
       const verificationToken = uuidv4();
       if (!verificationToken) throw new Error("Unexpected error, please try again.");
 
+      const serialNumber: string = await this.userRepositoryImpl.generateNextSerialNumber();
+
       const otp = await OTPService.setOtp(verificationToken);
       if (!otp) throw new Error("Unexpected error, please try again.");
 
@@ -38,12 +41,13 @@ export class RegisterUseCase {
         existingUser.password = hashedPassword;
         await this.userRepositoryImpl.updateUser(existingUser as User);
       } else {
-        await this.userRepositoryImpl.createUser({
+        await this.userRepositoryImpl.createUser<CreateLocalUser>({
           fullName: fullName,
           email: email,
           password: hashedPassword,
           verificationToken: verificationToken,
-          role: role
+          role: role,
+          serialNumber: serialNumber
         });
       }
 
@@ -127,18 +131,15 @@ export class LoginUseCase {
 
   async execute(data: LoginRequest): Promise<LoginResponse> {
     try {
+      console.log("data : ",data);
       const { email, password, role } = data;
       if (!email || !password || !role) throw new Error("Invalid request.");
 
-      // validateOrThrow("email", email);
-      // validateOrThrow("password", password);
-      // validateOrThrow("role", role);
-
       let user: User | null = null;
 
-      if (role === "user" || role === "admin") { // TODO need to ahandle admin
+      if (role === "user" || role === "admin" || role === "superAdmin") { // TODO need to ahandle admin
         user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
-      } else if (role === "superAdmin") {
+      } else if (role === "systemAdmin") {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
           throw new Error("Invalid credentials.");
         }
@@ -162,15 +163,7 @@ export class LoginUseCase {
       let updateProfileImage;
 
       if (user.profileImage) {
-        const userOrProviderProfileUrl = user.profileImage;
-        if (!userOrProviderProfileUrl) throw new Error("Profile image fetching error.");
-        const urlParts = userOrProviderProfileUrl?.split('/');
-        if (!urlParts) throw new Error("UrlParts error.");
-        const s3Key = urlParts.slice(3).join('/');
-        if (!s3Key) throw new Error("Image retrieving.");
-        const signedUrl = await this.signedUrlService.generateSignedUrl(s3Key);
-        if (!signedUrl) throw new Error("Image fetching error.");
-        updateProfileImage = signedUrl
+        updateProfileImage = await this.signedUrlService.generateSignedUrl(user.profileImage);
       }
 
       return {
@@ -183,6 +176,7 @@ export class LoginUseCase {
         }
       };
     } catch (error) {
+      console.log("LoginUseCase error : ",error);
       throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
     }
   }

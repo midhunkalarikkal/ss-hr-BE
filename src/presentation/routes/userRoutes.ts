@@ -1,16 +1,15 @@
-import {Router} from "express"
-import { userController } from '../controllers/userController';
+import { Router } from 'express';
+import { upload } from '../../config/multerConfig';
 import { authMiddleware } from '../middleware/authMiddleware';
+import { userController } from '../controllers/userController';
 
 const router = Router();
 
+router.get('/chat/admins', authMiddleware, userController.getAdminsForChatSidebar);
 
-router.post('/', authMiddleware, userController.createUser);
-router.get('/', authMiddleware, userController.getAllUsers);
-router.get('/stats', authMiddleware, userController.getUserStats);
-router.get('/chat-sidebar', authMiddleware, userController.getAdminsForChatSidebar);
-router.get('/:id', authMiddleware, userController.getUserById);
-router.put('/:id', authMiddleware, userController.updateUser);
-router.delete('/:id', authMiddleware, userController.deleteUser);
+router.patch('/prfileImage', authMiddleware, upload.single("profileImage"), userController.updateUserProfileImage );
 
-export { router as adminUsersRoutes };
+router.get("/testimonials", authMiddleware, userController.getTestimonilas );
+
+export default router;
+

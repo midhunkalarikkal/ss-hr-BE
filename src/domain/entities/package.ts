@@ -14,7 +14,6 @@ export class Package {
         public priceUAE: string,
         public packageType: PackageType,
         public packageDuration: number,
-        public image: string,
         public features: string[],
         public food: boolean,
         public accommodation: boolean,

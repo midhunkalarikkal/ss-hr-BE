@@ -10,7 +10,6 @@ export interface CreatePackageRequest {
   priceUAE: string;
   packageType: PackageType;
   packageDuration: number;
-  image: string;
   features: string[];
   food: boolean;
   accommodation: boolean;
@@ -29,7 +28,6 @@ export interface CreatePackageResponse extends ApiResponse {
     priceUAE: string;
     packageType: PackageType;
     packageDuration: number;
-    image: string;
     features: string[];
     food: boolean;
     accommodation: boolean;
@@ -49,7 +47,6 @@ export interface UpdatePackageRequest {
   priceUAE?: string;
   packageType?: PackageType;
   packageDuration?: number;
-  image?: string;
   features?: string[];
   food?: boolean;
   accommodation?: boolean;
@@ -68,7 +65,6 @@ export interface UpdatePackageResponse extends ApiResponse {
     priceUAE: string;
     packageType: PackageType;
     packageDuration: number;
-    image: string;
     features: string[];
     food: boolean;
     accommodation: boolean;
@@ -93,7 +89,6 @@ export interface GetPackageByIdResponse extends ApiResponse {
     priceUAE: string;
     packageType: PackageType;
     packageDuration: number;
-    image: string;
     features: string[];
     food: boolean;
     accommodation: boolean;

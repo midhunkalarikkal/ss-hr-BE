@@ -3,11 +3,14 @@ import { User } from "../../domain/entities/user";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
+import { CreateLocalUserByAdmin } from "../../domain/repositories/IUserRepository";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import {CreateUserByAdminRequest,CreateUserByAdminResponse,UpdateUserRequest,UpdateUserResponse,DeleteUserRequest,GetUserByIdRequest,GetUserByIdResponse} from "../../infrastructure/dtos/user.dto";
 
 export class CreateUserByAdminUseCase {
-  constructor(private userRepository: UserRepositoryImpl) {}
+  constructor(
+    private userRepository: UserRepositoryImpl,
+  ) {}
 
   async execute(
     data: CreateUserByAdminRequest
@@ -19,16 +22,18 @@ export class CreateUserByAdminUseCase {
       if (existingUser) throw new Error("User already exists with this email");
 
       const hashedPassword = await PasswordHasher.hashPassword(password);
-
-      const createdUser = await this.userRepository.createUser({
+      
+      const serialNumber = await this.userRepository.generateNextSerialNumber();
+      
+      const createdUser = await this.userRepository.createUser<CreateLocalUserByAdmin>({
         fullName,
         email,
+        serialNumber,
         password: hashedPassword,
         role,
         phone: phone || "",
         phoneTwo: phoneTwo || "",
         isVerified: true,
-        verificationToken: "",
         profileImage: "",
       });
 

@@ -9,7 +9,6 @@ export interface IPackage extends Document {
   priceUAE: string;
   packageType: PackageType;
   packageDuration: number;
-  image: string;
   features: string[];
   food: boolean;
   accommodation: boolean;
@@ -56,11 +55,6 @@ const PackageSchema = new Schema<IPackage>({
     required: [true, "Package duration is required"],
     min: [1, "Package duration must be at least 1 day"],
     max: [365, "Package duration must be at most 365 days"],
-  },
-  image: {
-    type: String,
-    required: [true, "Package image is required"],
-    trim: true,
   },
   features: [{
     type: String,

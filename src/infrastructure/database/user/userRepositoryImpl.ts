@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import { IUser, UserModel } from "./userModel";
 import { Role, User } from "../../../domain/entities/user";
-import {ApiPaginationRequest,ApiResponse,FetchUsersForChatSideBar} from "../../dtos/common.dts";
-import { AdminFetchAllUsers,CreateUserProps,IUserRepository} from "../../../domain/repositories/IUserRepository";
+import { ApiPaginationRequest, ApiResponse, FetchUsersForChatSideBar } from "../../dtos/common.dts";
+import { AdminFetchAllAdmins, AdminFetchAllUsers, IUserRepository } from "../../../domain/repositories/IUserRepository";
 
 export class UserRepositoryImpl implements IUserRepository {
   private mapToEntity(user: IUser): User {
@@ -31,33 +31,29 @@ export class UserRepositoryImpl implements IUserRepository {
         .sort({ serialNumber: -1 })
         .lean();
 
-      if (!lastUser) {
+      if (!lastUser || !lastUser.serialNumber) {
         return "U001";
       }
 
-      const lastNumber = parseInt(lastUser.serialNumber.substring(1));
-
+      const lastNumber = parseInt(lastUser.serialNumber.substring(1), 10);
       const nextNumber = lastNumber + 1;
-      const newSerialNumber = `U${nextNumber.toString().padStart(3, "0")}`;
 
+      const newSerialNumber = `U${nextNumber.toString().padStart(3, "0")}`;
       return newSerialNumber;
     } catch (error) {
+      console.log("error : ", error);
       throw new Error("Failed to generate serial number");
     }
   }
 
-  async createUser(user: CreateUserProps): Promise<User> {
+  async createUser<T>(user: T): Promise<User> {
     try {
-      const serialNumber = await this.generateNextSerialNumber();
-
-      const createdUser = await UserModel.create({ ...user, serialNumber });
-
+      console.log("user : ", user)
+      const createdUser = await UserModel.create({ ...user });
       return this.mapToEntity(createdUser);
     } catch (error) {
       console.error("Detailed createUser error:", error);
-      throw new Error(
-        "Unable to register, please try again after a few minutes."
-      );
+      throw new Error("Unable to register, please try again after a few minutes.");
     }
   }
 
@@ -98,13 +94,13 @@ export class UserRepositoryImpl implements IUserRepository {
       const skip = (page - 1) * limit;
       const [users, totalCount] = await Promise.all([
         UserModel.find(
-          {},
+          { role: "user" },
           {
             _id: 1,
             serialNumber: 1,
             fullName: 1,
             email: 1,
-            role: 1,
+            profileImage: 1,
             isBlocked: 1,
             isVerified: 1,
             createdAt: 1,
@@ -197,4 +193,48 @@ export class UserRepositoryImpl implements IUserRepository {
       throw new Error("Failed to get total count");
     }
   }
+
+  async findAllAdmins({ page, limit, }: ApiPaginationRequest): Promise<ApiResponse<AdminFetchAllAdmins>> {
+    try {
+      const skip = (page - 1) * limit;
+      const [users, totalCount] = await Promise.all([
+        UserModel.find(
+          { role: { $in: ["admin", "superAdmin"] } },
+          {
+            _id: 1,
+            fullName: 1,
+            email: 1,
+            role: 1,
+            isBlocked: 1,
+            createdAt: 1,
+            profileImage: 1,
+          }
+        )
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        UserModel.countDocuments(),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / limit);
+      return {
+        data: users.map(this.mapToEntity),
+        totalPages,
+        currentPage: page,
+        totalCount,
+      };
+    } catch (error) {
+      throw new Error("Failed to fetch  froadminsm database.");
+    }
+  }
+
+  async deleteUserById(id: Types.ObjectId): Promise<boolean> {
+    try {
+      const result = await UserModel.findByIdAndDelete(id);
+      return !!result;
+    } catch (error) {
+      throw new Error("Failed to delete user.");
+    }
+  }
+
 }

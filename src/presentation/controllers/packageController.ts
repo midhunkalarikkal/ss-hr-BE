@@ -10,7 +10,7 @@ import {
   GetAllPackagesUseCase,
   GetPackagesByTypeUseCase,
   GetPackageStatsUseCase
-} from '../../application/use-cases/packageUseCases';
+} from '../../application/adminUse-cases/adminPackageUseCases';
 
 const packageRepositoryImpl = new PackageRepositoryImpl();
 const createPackageUseCase = new CreatePackageUseCase(packageRepositoryImpl);
