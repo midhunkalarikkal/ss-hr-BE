@@ -3,9 +3,9 @@ import { User } from "../../domain/entities/user";
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
+import { CreateLocalUserByAdmin } from "../../domain/repositories/IUserRepository";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import {CreateUserByAdminRequest,CreateUserByAdminResponse,UpdateUserRequest,UpdateUserResponse,DeleteUserRequest,GetUserByIdRequest,GetUserByIdResponse} from "../../infrastructure/dtos/user.dto";
-import { CreateLocalUserByAdmin } from "../../domain/repositories/IUserRepository";
 
 export class CreateUserByAdminUseCase {
   constructor(

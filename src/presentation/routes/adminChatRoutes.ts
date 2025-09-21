@@ -4,6 +4,6 @@ import { adminUserController } from '../controllers/adminUserController';
 
 const router = Router();
 
-router.get('/users', authMiddleware, adminUserController.getAllUsersForChatSidebar);
+router.get('/users', authMiddleware, adminUserController.getUserForChatSidebar);
 
 export default router;

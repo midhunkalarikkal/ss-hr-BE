@@ -1,8 +1,3 @@
-import { Types } from "mongoose";
-import { Testimonial } from "../../domain/entities/testimonial";
-import { ApiResponse } from "../../infrastructure/dtos/common.dts";
-import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
-import { TestimonialRepositoryImpl } from "../../infrastructure/database/testimonial/testimonialRepositoryImpl";
 import {
   CreateTestimonialRequest,
   CreateTestimonialResponse,
@@ -12,6 +7,12 @@ import {
   GetTestimonialByIdRequest,
   GetTestimonialByIdResponse,
 } from "../../infrastructure/dtos/testimonial.dto";
+import { Testimonial } from "../../domain/entities/testimonial";
+import { ApiResponse } from "../../infrastructure/dtos/common.dts";
+import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
+import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
+import { TestimonialRepositoryImpl } from "../../infrastructure/database/testimonial/testimonialRepositoryImpl";
+
 
 export class CreateTestimonialUseCase {
   constructor(private testimonialRepository: TestimonialRepositoryImpl) {}
@@ -137,15 +138,36 @@ export class GetTestimonialByIdUseCase {
 }
 
 export class GetAllTestimonialsUseCase {
-  constructor(private testimonialRepository: TestimonialRepositoryImpl) {}
+  constructor(
+    private testimonialRepository: TestimonialRepositoryImpl,
+    private signedUrlService: SignedUrlService
+  ) {}
 
   async execute(data: { page: number; limit: number }) {
     try {
       const result = await this.testimonialRepository.findAllTestimonials(data);
+
+       const updatedResult = await Promise.all(
+                result.data?.map(async (testimonial) => {
+                    let updateProfileImage = testimonial.clientPhoto;
+
+                    if (testimonial.clientPhoto) {
+                        updateProfileImage = await this.signedUrlService.generateSignedUrl(
+                            testimonial.clientPhoto
+                        );
+                    }
+
+                    return {
+                        ...testimonial,
+                        clientPhoto: updateProfileImage,
+                    };
+                }) ?? []
+            );
+
       return {
         success: true,
         message: "Testimonials retrieved successfully",
-        ...result,
+        data: updatedResult ?? [],
       };
     } catch (error) {
       throw handleUseCaseError(error || "Failed to get testimonials");

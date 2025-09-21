@@ -9,7 +9,7 @@ import {
   GetTestimonialByIdUseCase,
   GetAllTestimonialsUseCase,
   GetTestimonialStatsUseCase
-} from '../../application/use-cases/testimonialUseCases';
+} from '../../application/adminUse-cases/adminTestimonialUseCases';
 
 const testimonialRepositoryImpl = new TestimonialRepositoryImpl();
 const createTestimonialUseCase = new CreateTestimonialUseCase(testimonialRepositoryImpl);

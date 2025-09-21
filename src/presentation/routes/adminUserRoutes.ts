@@ -1,16 +1,14 @@
 import {Router} from "express"
 import { authMiddleware } from '../middleware/authMiddleware';
-import { userController } from '../controllers/userController';
+import { adminUserController } from "../controllers/adminUserController";
 
 const router = Router();
 
-
-router.post('/', authMiddleware, userController.createUser);
-router.get('/', authMiddleware, userController.getAllUsers);
-router.get('/stats', authMiddleware, userController.getUserStats);
-router.get('/chat-sidebar', authMiddleware, userController.getAdminsForChatSidebar);
-router.get('/:id', authMiddleware, userController.getUserById);
-router.put('/:id', authMiddleware, userController.updateUser);
-router.delete('/:id', authMiddleware, userController.deleteUser);
+router.post('/', authMiddleware, adminUserController.createUser);
+router.get('/', authMiddleware, adminUserController.getAllUsers);
+router.get('/stats', authMiddleware, adminUserController.getUserStats);
+router.get('/:id', authMiddleware, adminUserController.getUserById);
+router.put('/:id', authMiddleware, adminUserController.updateUser);
+router.delete('/:id', authMiddleware, adminUserController.deleteUser);
 
 export default router;

@@ -1,16 +1,18 @@
 import { ApiResponse } from "../../infrastructure/dtos/common.dts";
+import { CreateAdmin } from "../../domain/repositories/IUserRepository";
 import { FileUploadService } from "../../infrastructure/service/fileUpload";
 import { handleUseCaseError } from "../../infrastructure/error/useCaseError";
 import { PasswordHasher } from "../../infrastructure/security/passwordHasher";
 import { validateFile } from "../../infrastructure/validator/imageFileValidator";
+import { SignedUrlService } from "../../infrastructure/service/generateSignedUrl";
 import { UserRepositoryImpl } from "../../infrastructure/database/user/userRepositoryImpl";
 import { CreateAdminRequest, CreateAdminResponse } from "../../infrastructure/dtos/admin.dtos";
-import { CreateAdmin } from "../../domain/repositories/IUserRepository";
 
 export class CreateAdminUseCase {
     constructor(
         private userRepositoryImpl: UserRepositoryImpl,
         private fileUploadService: FileUploadService,
+        private signedUrlService: SignedUrlService
     ) { }
 
     async execute(payload: CreateAdminRequest): Promise<ApiResponse<CreateAdminResponse>> {
@@ -41,9 +43,13 @@ export class CreateAdminUseCase {
                 isVerified: true,
             });
 
+            const signedUrl = await this.signedUrlService.generateSignedUrl(
+                createdAdmin.profileImage
+            );
+
             const { phoneTwo, isVerified, verificationToken, googleId, updatedAt, password: adminPassword, ...newAdmin } = createdAdmin;
 
-            return { success: true, message: "New admin created", data: newAdmin }
+            return { success: true, message: "New admin created", data: {...newAdmin, profileImage: signedUrl} }
         } catch (error) {
             throw handleUseCaseError(error || "Unexpected error in VerifyOTPUseCase");
         }
