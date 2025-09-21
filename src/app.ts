@@ -8,8 +8,8 @@ import cookieParser from 'cookie-parser';
 import { appConfig } from './config/env';
 import passport from './infrastructure/auth/passport';
 import authRoutes from './presentation/routes/authRoutes';
-import messageRoutes from './presentation/routes/messageRoutes';
 import userRoutes from './presentation/routes/userRoutes';
+import messageRoutes from './presentation/routes/messageRoutes';
 import adminJobRoutes from './presentation/routes/adminJobRoutes';
 import adminChatRoutes from './presentation/routes/adminChatRoutes';
 import adminUsersRoutes from './presentation/routes/adminUserRoutes';
@@ -18,17 +18,15 @@ import adminPackageRoutes from "./presentation/routes/adminPackageRoutes";
 import adminSettingsRoutes from './presentation/routes/adminSettingsRoutes';
 import adminTestimonialRoutes from './presentation/routes/adminTestimonialRoutes';
 
-
 const app = express();
 
 if (appConfig.nodeEnv === 'development') {
   app.use(morgan('dev'));
 }
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://ss-hr-c-fe-fucg.vercel.app"
-];
+console.log("appConfig.nodeEnv : ",appConfig.nodeEnv);
+
+const allowedOrigins = [appConfig.frontendUrl];
 
 app.use(cors({
   origin: (origin, callback) => {
