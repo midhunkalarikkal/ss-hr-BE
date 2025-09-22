@@ -24,9 +24,10 @@ if (appConfig.nodeEnv === 'development') {
   app.use(morgan('dev'));
 }
 
-console.log("appConfig.nodeEnv : ",appConfig.nodeEnv);
-
-const allowedOrigins = [appConfig.frontendUrl];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://ss-hr-c-fe-fucg.vercel.app"
+];
 
 app.use(cors({
   origin: (origin, callback) => {
