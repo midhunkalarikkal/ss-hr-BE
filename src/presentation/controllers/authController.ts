@@ -127,7 +127,6 @@ export class AuthController {
         message,
         user: authUserWithoutToken,
       };
-      console.log("resultWithoutToken : ", resultWithoutToken);
       res.status(200).json(resultWithoutToken);
     } catch (error) {
       console.log("error : ", error);
