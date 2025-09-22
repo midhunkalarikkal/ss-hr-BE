@@ -117,10 +117,9 @@ export class AuthController {
       });
       console.log("user in login",user);
       res.cookie("token", user.token, {
-        maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: appConfig.nodeEnv !== "development" ? "none" : "lax",
         secure: appConfig.nodeEnv !== "development",
+        sameSite: appConfig.nodeEnv !== "development" ? "none" : "lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
         path: "/",
       });
