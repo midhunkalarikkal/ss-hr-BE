@@ -115,6 +115,7 @@ export class AuthController {
         password,
         role,
       });
+      console.log("user in login",user);
       res.cookie("token", user.token, {
         maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
