@@ -24,10 +24,9 @@ if (appConfig.nodeEnv === 'development') {
   app.use(morgan('dev'));
 }
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://ss-hr-c-fe-fucg.vercel.app"
-];
+const allowedOrigins = [appConfig.frontendUrl];
+
+console.log("allowedOrigins : ",allowedOrigins);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -43,11 +42,11 @@ app.use(cors({
 }));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'mySecret',
+  secret: appConfig.sessionSecret || "secret",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: appConfig.nodeEnv === 'production',
     maxAge: 24 * 60 * 60 * 1000 
   }
 }));

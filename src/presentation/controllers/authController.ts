@@ -24,7 +24,7 @@ import { SignedUrlRepositoryImpl } from "../../infrastructure/database/signedUrl
 const userRepositoryImpl = new UserRepositoryImpl();
 const signedUrlRepositoryImpl = new SignedUrlRepositoryImpl();
 
-const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl);const registerUseCase = new RegisterUseCase(userRepositoryImpl);
+const signedUrlService = new SignedUrlService(aws_s3Config.bucketName, signedUrlRepositoryImpl); const registerUseCase = new RegisterUseCase(userRepositoryImpl);
 const verifyOTPUseCase = new VerifyOTPUseCase(userRepositoryImpl);
 const resendOtpUseCase = new ResendOtpUseCase(userRepositoryImpl);
 const loginUseCase = new LoginUseCase(userRepositoryImpl, signedUrlService);
@@ -52,11 +52,13 @@ export class AuthController {
     try {
       const validateData = RegisterZodSchema.parse(req.body);
       const result = await this.registerUseCase.execute(validateData);
+
       res.cookie("token", result.user.token, {
-        maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "strict",
-        secure: appConfig.nodeEnv !== "development",
+        secure: appConfig.nodeEnv === "production",
+        sameSite: appConfig.nodeEnv === "production" ? "none" : "lax",
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        path: "/",
       });
 
       const { token: token, ...authUserWithoutToken } = result.user;
@@ -115,12 +117,15 @@ export class AuthController {
         password,
         role,
       });
+
       res.cookie("token", user.token, {
-        maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "strict",
-        secure: appConfig.nodeEnv !== "development",
+        secure: appConfig.nodeEnv === "production",
+        sameSite: appConfig.nodeEnv === "production" ? "none" : "lax",
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        path: "/",
       });
+      
       const { token: token, ...authUserWithoutToken } = user;
       const resultWithoutToken = {
         success,
@@ -164,30 +169,25 @@ export class AuthController {
   async googleCallback(req: Request, res: Response) {
     try {
       if (!req.user) {
-        const frontendUrl = process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : "https://ss-hr-vercel.vercel.app";;
+        const frontendUrl = appConfig.frontendUrl;
         return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
       }
 
       const result = await this.googleAuthUseCase.execute(req.user as any);
 
       res.cookie("token", result.user.token, {
-        maxAge: 2 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "strict",
         secure: appConfig.nodeEnv !== "development",
+        sameSite: appConfig.nodeEnv !== "development" ? "none" : "lax",
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        path: "/",
       });
 
-      const frontendUrl = process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : "https://ss-hr-vercel.vercel.app";;
+      const frontendUrl =  appConfig.frontendUrl;
       res.redirect(`${frontendUrl}/`);
     } catch (error) {
       console.log("Google auth error:", error);
-      const frontendUrl = process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : "https://ss-hr-vercel.vercel.app";;
+      const frontendUrl =  appConfig.frontendUrl;
       res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
     }
   }

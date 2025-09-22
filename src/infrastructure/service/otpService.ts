@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
-import { generateOTP } from 'otp-generator-module';
 import { redis } from '../lib/redis';
 import { mailConfig } from '../../config/env';
+import { generateOTP } from 'otp-generator-module';
 
 interface EmailOptions {
   subject: string;
@@ -43,7 +43,7 @@ export class OTPService {
       });
 
       await transporter.sendMail({
-        from: "Slotflow",
+        from: "SS-Group",
         to: options.to,
         subject: options.subject,
         html: options.html,
@@ -73,10 +73,10 @@ export class OTPService {
                     <p style="font-size: 1.1em;">Hi,</p>
                     <p>Thank you for choosing Your Brand. Use the following OTP to complete your Sign-Up procedures. OTP is valid for 5 minutes.</p>
                     <h2 style="background: #635BFF; margin: 0 auto; width: max-content; padding: 0 10px; color: #fff; border-radius: 4px;">${otp}</h2>
-                    <p style="font-size: 0.9em;">Regards,<br />Slotflow</p>
+                    <p style="font-size: 0.9em;">Regards,<br />ss-hr-app</p>
                     <hr style="border: none; border-top: 1px solid #eee;" />
                     <div style="float: right; padding: 8px 0; color: #aaa; font-size: 0.8em; line-height: 1; font-weight: 300;">
-                        <p>Slotflow Inc</p>
+                        <p>ss-hr-app Inc</p>
                         <p>White clouds</p>
                         <p>Somewhere in the universe</p>
                     </div>
@@ -103,13 +103,13 @@ export class OTPService {
                         <a href="#" style="font-size: 1.4em; color: #635BFF; text-decoration: none; font-weight: 600;">SS HR CONSULTANCY</a>
                     </div>
                     <p style="font-size: 1.1em;">Hi,</p>
-                    <p>Your service registration with Slotflow has been successfully approved.</p>
+                    <p>Your service registration with ss-hr-app  has been successfully approved.</p>
                     <p>You can now log in to your account and begin using our services.</p>
                     <p>We're excited to have you on board and look forward to providing you with an excellent experience.</p>
-                    <p style="font-size: 0.9em;">Regards,<br />Slotflow</p>
+                    <p style="font-size: 0.9em;">Regards,<br />ss-hr-app</p>
                     <hr style="border: none; border-top: 1px solid #eee;" />
                     <div style="float: right; padding: 8px 0; color: #aaa; font-size: 0.8em; line-height: 1; font-weight: 300;">
-                        <p>Slotflow Inc</p>
+                        <p>ss-hr-app Inc</p>
                         <p>White clouds</p>
                         <p>Somewhere in the universe</p>
                     </div>

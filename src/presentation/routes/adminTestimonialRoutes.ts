@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { testimonialController } from "../controllers/testimonialController";
-import { authMiddleware } from "../middleware/authMiddleware";
 import { upload } from "../../config/multerConfig";
+import { authMiddleware } from "../middleware/authMiddleware";
+import { testimonialController } from "../controllers/testimonialController";
 
 const router = Router();
 
