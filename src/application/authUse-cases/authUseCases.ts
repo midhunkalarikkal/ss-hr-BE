@@ -131,7 +131,6 @@ export class LoginUseCase {
 
   async execute(data: LoginRequest): Promise<LoginResponse> {
     try {
-      console.log("data : ",data);
       const { email, password, role } = data;
       if (!email || !password || !role) throw new Error("Invalid request.");
 
