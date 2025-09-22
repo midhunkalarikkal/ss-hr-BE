@@ -118,14 +118,16 @@ export class AuthController {
         role,
       });
 
+      console.log("appConfig.nodeEnv === development : ",appConfig.nodeEnv === "development")
+
       res.cookie("token", user.token, {
         httpOnly: true,
-        secure: appConfig.nodeEnv === "production",
-        sameSite: appConfig.nodeEnv === "production" ? "none" : "lax",
+        secure: appConfig.nodeEnv === "development",
+        sameSite: appConfig.nodeEnv === "development" ? "none" : "lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
         path: "/",
       });
-      
+
       const { token: token, ...authUserWithoutToken } = user;
       const resultWithoutToken = {
         success,
@@ -177,8 +179,8 @@ export class AuthController {
 
       res.cookie("token", result.user.token, {
         httpOnly: true,
-        secure: appConfig.nodeEnv !== "development",
-        sameSite: appConfig.nodeEnv !== "development" ? "none" : "lax",
+        secure: appConfig.nodeEnv === "development",
+        sameSite: appConfig.nodeEnv === "development" ? "none" : "lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
         path: "/",
       });
