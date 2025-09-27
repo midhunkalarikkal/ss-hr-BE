@@ -19,9 +19,6 @@ export class MessageRepositoryImpl implements IMessageRepository {
     async getAllMessages(payload: CommonRequest): Promise<GetAllMessageResponse> {
         const { fromUserId, toUserId } = payload;
 
-        console.log("fromUserId : ",fromUserId);
-        console.log("toUserId : ",toUserId);
-
         let messages = await MessageModel.find(
             {
             $or: [

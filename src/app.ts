@@ -26,8 +26,6 @@ if (appConfig.nodeEnv === 'development') {
 
 const allowedOrigins = [appConfig.frontendUrl];
 
-console.log("allowedOrigins : ",allowedOrigins);
-
 app.use(cors({
   origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
@@ -46,7 +44,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: appConfig.nodeEnv === 'production',
+    secure: appConfig.nodeEnv === 'development',
     maxAge: 24 * 60 * 60 * 1000 
   }
 }));

@@ -25,8 +25,6 @@ export class GetAllMessagesUseCase {
             })
         );
 
-        console.log("result : ",result);
-
         return { success: true, message: "Fetched messages", data: result }
     }
 }

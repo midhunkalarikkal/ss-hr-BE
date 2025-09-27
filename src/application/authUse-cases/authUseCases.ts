@@ -140,12 +140,6 @@ export class LoginUseCase {
         user = await this.userRepositoryImpl.findUserByEmailWithRole(email,role);
       } else if (role === "systemAdmin") {
         if (email !== adminConfig.adminEmail || password !== adminConfig.adminPassword) {
-          console.log("email : ",email);
-          console.log("adminConfig.adminEmail : ",adminConfig.adminEmail);
-          console.log("email === adminConfig.adminEmail : ",email === adminConfig.adminEmail)
-          console.log("password : ",password);
-          console.log("adminConfig.adminPassword : ",adminConfig.adminPassword);
-          console.log("password === adminConfig.adminPassword : ",password === adminConfig.adminPassword);
           throw new Error("Invalid credentials.");
         }
         const token = JWTService.generateToken({ email: email, role: role });
@@ -154,7 +148,6 @@ export class LoginUseCase {
         throw new Error("Invalid request.");
       }
 
-      console.log("here");
       if (!user) throw new Error("Invalid credentials")
 
       if (user.isBlocked) throw new Error("Your account is blocked, please contact us.");
